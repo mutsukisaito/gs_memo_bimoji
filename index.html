@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#30322f">
+  <meta name="description" content="スキマ時間に一文字。お手本を見ながらスマホで練習する美文字ログ。">
+  <title>美文字ログ</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="js/characters.js" defer></script>
+  <script src="js/evaluation.js" defer></script>
+  <script src="js/records.js" defer></script>
+  <script src="js/templates.js" defer></script>
+  <script src="js/backup.js" defer></script>
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <div class="app">
+    <header class="header"><h1>美文字ログ<span>一文字ずつ、私の字に。</span></h1><span class="edition">練習帳</span></header>
+    <nav class="tabs" aria-label="メインメニュー">
+      <button class="tab active" data-view="writing" aria-current="page" aria-controls="writing-view">書く</button>
+      <button class="tab" data-view="records" aria-controls="records-view">記録</button>
+      <button class="tab" data-view="growth" aria-controls="growth-view">成長の証</button>
+    </nav>
+    <main>
+      <div id="writing-view">
+      <section class="reference-section" aria-labelledby="reference-heading">
+        <div class="section-heading"><h2 id="reference-heading">今日の一文字</h2><button id="choose-character" class="text-button" aria-haspopup="dialog">文字を選ぶ <span aria-hidden="true">↗</span></button></div>
+        <div class="reference-row">
+          <div class="vertical-label" aria-hidden="true">お手本</div>
+          <div class="reference-paper"><canvas id="reference-canvas" width="600" height="600" role="img" aria-label="原のお手本"></canvas></div>
+          <div class="reference-note"><span id="character-category">漢字</span><p>形を見て、<br>ゆっくりと。</p></div>
+        </div>
+        <aside id="previous-feedback" class="previous-feedback" aria-labelledby="previous-heading">
+          <h2 id="previous-heading">前回の練習から</h2>
+          <p id="previous-date" class="previous-date"></p>
+          <p id="previous-comment" aria-live="polite"></p>
+        </aside>
+      </section>
+      <section aria-labelledby="practice-heading">
+        <div class="section-heading practice-heading"><h2 id="practice-heading">書いてみましょう</h2><span>指・ペンで入力</span></div>
+        <div class="practice-paper">
+          <canvas id="overlay-canvas" width="1000" height="1000" aria-hidden="true" hidden></canvas>
+          <canvas id="writing-canvas" width="1000" height="1000" role="img" aria-label="手書き練習欄。指、ペン、マウスで書けます。"></canvas>
+          <img id="result-stamp" class="result-stamp" alt="" hidden>
+        </div>
+        <div class="actions">
+          <button id="clear" class="clear-button" disabled><span aria-hidden="true">↺</span> 書き直す</button>
+          <button id="evaluate" class="evaluate-button" disabled>採点する</button>
+        </div>
+        <p id="writing-status" class="writing-status" role="status" aria-live="polite">白い枠に一文字書いてみましょう</p>
+        <section id="evaluation-result" class="evaluation-result" aria-labelledby="result-heading" hidden>
+          <div class="result-header">
+            <div><p class="eyebrow">今回の練習</p><h2 id="result-heading">配置の目安</h2></div>
+            <p class="total-score"><strong id="total-score"></strong><span> / 100点</span></p>
+          </div>
+          <div class="feedback"><h3 id="feedback-focus"></h3><p id="feedback-comment"></p></div>
+          <div class="overlay-control"><label><input id="show-overlay" type="checkbox" checked> お手本を重ねる</label><span>グレー：お手本 ／ 黒：自分の字</span></div>
+          <dl class="score-details" aria-label="項目別の点数">
+            <div><dt>位置</dt><dd id="position-score"></dd></div>
+            <div><dt>大きさ</dt><dd id="size-score"></dd></div>
+            <div><dt>縦横比</dt><dd id="balance-score"></dd></div>
+          </dl>
+          <p class="evaluation-note">点数はお手本との位置・大きさ・縦横比の近さです。文字の正しさや、線の美しさは評価していません。</p>
+          <button id="save-record" class="save-button">この練習を保存する</button>
+          <p id="save-status" class="save-status" role="status" aria-live="polite"></p>
+        </section>
+      </section>
+      <p class="development-note">採点後に「この練習を保存する」を押すと、このブラウザに記録が残ります。保存していない筆跡は再読み込みで消えます。</p>
+      </div>
+      <section id="records-view" aria-labelledby="records-heading" hidden>
+        <div class="section-heading records-heading"><h2 id="records-heading">練習の記録</h2><span id="records-count"></span></div>
+        <section class="backup-panel" aria-labelledby="backup-heading">
+          <h3 id="backup-heading">記録のバックアップ</h3>
+          <p>全記録と登録お手本の文字名・画像をJSONファイルに保存し、ほかの端末でも読み込めます。</p>
+          <div class="backup-actions"><button id="export-records">書き出す</button><label class="import-label" for="import-records">ファイルを読み込む<input id="import-records" type="file" accept=".json,application/json" class="file-input"></label></div>
+          <p id="backup-status" class="save-status" role="status" aria-live="polite"></p>
+        </section>
+        <div class="records-toolbar"><label for="record-filter">文字で絞り込む</label><select id="record-filter"><option value="">すべての文字</option></select></div>
+        <div class="records-toolbar records-sort"><label for="record-sort">並べ替え</label><select id="record-sort"><option value="date-desc">日付の新しい順</option><option value="date-asc">日付の古い順</option><option value="score-desc">点数の高い順</option><option value="score-asc">点数の低い順</option></select></div>
+        <p id="records-status" class="records-status" role="status" aria-live="polite"></p>
+        <div id="records-list" class="records-list"></div>
+        <p class="development-note">点数が同じ場合は日付の新しい順に表示します。記録はこの端末・ブラウザに保存されます。ブラウザのデータ削除で記録も消えます。</p>
+      </section>
+      <section id="growth-view" aria-labelledby="growth-heading" hidden>
+        <div class="section-heading records-heading"><h2 id="growth-heading">成長の証</h2></div>
+        <dl class="practice-stats"><div><dt>保存した練習数</dt><dd><strong id="practice-count">0</strong><span>字</span></dd></div><div><dt>練習日数</dt><dd><strong id="practice-days">0</strong><span>日</span></dd></div></dl>
+        <p class="growth-intro">同じ文字の、最初と最新の自分を見比べましょう。</p>
+        <p id="growth-status" class="records-status" role="status" aria-live="polite"></p>
+        <div id="growth-list" class="growth-list"></div>
+        <p class="development-note">練習数は保存した記録の件数、練習日数は練習時の日付の重複を除いた数です。記録を削除すると集計も変わります。</p>
+      </section>
+    </main>
+    <footer>美文字ログ <span>日々の小さな練習を、成長の記録に。</span></footer>
+  </div>
+  <dialog id="character-dialog" aria-labelledby="dialog-title">
+    <div class="dialog-header"><div><p class="eyebrow">一文字を選んで、はじめる</p><h2 id="dialog-title">練習する文字</h2></div><button id="close-dialog" class="close-button" aria-label="文字選択を閉じる">×</button></div>
+    <p class="dialog-note">文字を変えると、書きかけの内容は消えます。</p>
+    <button id="add-template" class="template-add">画像のお手本を登録</button>
+    <div class="category-buttons" role="group" aria-label="文字の種類"><button data-category="hiragana" aria-pressed="false">ひらがな <span>46</span></button><button data-category="kanji" aria-pressed="true">漢字 <span>39</span></button><button data-category="custom" aria-pressed="false">登録 <span id="template-count">0</span></button></div>
+    <p id="template-list-status" class="save-status" role="status"></p>
+    <div id="character-grid" class="character-grid" role="group" aria-label="文字一覧"></div>
+    <div id="remove-template-area" hidden><button id="remove-template" class="delete-button">選択中の登録お手本を削除</button><div id="remove-template-confirm" class="delete-confirmation" hidden><p>このお手本を削除しますか？書きかけの文字は消えます。保存済みの練習記録は残ります。</p><div><button id="cancel-remove-template" class="cancel-delete">キャンセル</button><button id="confirm-remove-template" class="confirm-delete">お手本を削除する</button></div></div></div>
+  </dialog>
+  <dialog id="template-dialog" aria-labelledby="template-title">
+    <div class="dialog-header"><h2 id="template-title">画像のお手本を登録</h2><button id="close-template" class="close-button" aria-label="お手本登録を閉じる">×</button></div>
+    <form id="template-form" novalidate>
+      <label class="template-field" for="template-character">文字名（1文字）<input id="template-character" type="text" autocomplete="off" placeholder="例：原" required></label>
+      <label class="template-field" for="template-file">お手本画像（PNG・JPEG・WebP、10MBまで）<input id="template-file" type="file" accept="image/png,image/jpeg,image/webp" required></label>
+      <p class="evaluation-note">白背景または透過背景に、黒い文字が1文字ある画像を選んでください。余白を含めて正方形の枠内に収め、600×600に縮小して保存します。</p>
+      <div id="template-preview-area" hidden><p class="evaluation-note">保存するお手本のプレビュー</p><div class="template-preview"><canvas id="template-preview" width="600" height="600" role="img" aria-label="登録するお手本のプレビュー"></canvas></div></div>
+      <label class="template-replace"><input id="replace-template" type="checkbox"> 同じ文字の登録お手本がある場合、画像を置き換える</label>
+      <label class="template-replace"><input id="discard-template-writing" type="checkbox"> 書きかけの文字がある場合、消して登録したお手本で練習する</label>
+      <button id="save-template" type="submit" class="save-button" disabled>登録して練習する</button>
+      <p id="template-status" class="save-status" role="status" aria-live="polite"></p>
+    </form>
+  </dialog>
+  <dialog id="record-dialog" aria-labelledby="record-title">
+    <div class="dialog-header"><div><p id="record-date" class="eyebrow"></p><h2 id="record-title"></h2></div><button id="close-record" class="close-button" aria-label="記録の詳細を閉じる">×</button></div>
+    <p class="record-total"><strong id="record-score"></strong><span> / 100点</span></p>
+    <div class="practice-paper record-paper"><canvas id="record-overlay" width="1000" height="1000" aria-hidden="true"></canvas><canvas id="record-writing" width="1000" height="1000" role="img" aria-label="保存した筆跡"></canvas><img id="record-stamp" class="result-stamp" alt=""></div>
+    <div class="overlay-control"><label><input id="record-show-overlay" type="checkbox" checked> お手本・スタンプを重ねる</label><span>採点時のお手本を表示しています</span></div>
+    <p id="record-image-status" class="save-status" role="status"></p>
+    <div class="feedback"><h3 id="record-focus"></h3><p id="record-comment"></p></div>
+    <dl class="score-details" aria-label="保存した項目別の点数"><div><dt>位置</dt><dd id="record-position"></dd></div><div><dt>大きさ</dt><dd id="record-size"></dd></div><div><dt>縦横比</dt><dd id="record-balance"></dd></div></dl>
+    <p class="evaluation-note">点数は配置の目安です。保存した評価を表示しており、再採点は行いません。</p>
+    <button id="delete-record" class="delete-button">この記録を削除する</button>
+    <div id="delete-confirmation" class="delete-confirmation" role="group" aria-label="記録の削除確認" hidden>
+      <p>この記録を削除しますか？<br>削除すると元に戻せません。</p>
+      <div><button id="cancel-delete" class="cancel-delete">キャンセル</button><button id="confirm-delete" class="confirm-delete">削除する</button></div>
+    </div>
+    <p id="delete-status" class="save-status" role="status" aria-live="polite"></p>
+  </dialog>
+  <dialog id="import-dialog" aria-labelledby="import-title">
+    <div class="dialog-header"><h2 id="import-title">記録の読み込み</h2><button id="close-import" class="close-button" aria-label="読み込みをキャンセル">×</button></div>
+    <p id="import-filename" class="import-filename"></p>
+    <p id="import-summary" class="import-summary"></p>
+    <p class="evaluation-note">既存の記録・お手本は残して追加します。同じIDの記録、同じ文字名のお手本は読み飛ばし、内容が異なる場合も既存データを優先します。</p>
+    <div class="import-actions"><button id="cancel-import">キャンセル</button><button id="confirm-import">追加する</button></div>
+    <p id="import-status" class="save-status" role="status" aria-live="polite"></p>
+  </dialog>
+</body>
+</html>
