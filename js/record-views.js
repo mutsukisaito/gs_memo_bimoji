@@ -59,13 +59,6 @@ const RecordViews = (() => {
     pair.append(comparisonSide(group.first, "最初の自分"));
     pair.append(comparisonSide(group.best, "最高点の自分"));
     card.append(pair);
-    if (group.first.reference.image !== group.best.reference.image
-      || group.first.evaluation.version !== group.best.evaluation.version) {
-      const note = document.createElement("p");
-      note.className = "comparison-note";
-      note.textContent = "お手本または採点方法が異なる記録です。点数は参考に、字の変化を見比べてください。";
-      card.append(note);
-    }
     return card;
   }
 

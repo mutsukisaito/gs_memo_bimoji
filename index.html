@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#30322f">
   <meta name="description" content="スキマ時間に一文字。お手本を見ながらスマホで練習する美文字ログ。">
   <title>美文字ログ</title>
-  <link rel="stylesheet" href="css/style.css?v=20261116-shape">
+  <link rel="stylesheet" href="css/style.css?v=20261116-result-four-scores">
   <script src="js/characters.js" defer></script>
   <script src="js/evaluation.js" defer></script>
   <script src="js/shape-evaluation.js?v=20261116-shape-2" defer></script>
@@ -14,7 +14,7 @@
   <script src="js/templates.js" defer></script>
   <script src="js/backup.js?v=20261116-data-management" defer></script>
   <script src="js/canvas-drawing.js?v=20261116-refactor" defer></script>
-  <script src="js/record-views.js?v=20261116-refactor" defer></script>
+  <script src="js/record-views.js?v=20261116-growth-notes" defer></script>
   <script src="js/app.js?v=20261116-shape" defer></script>
 </head>
 <body>
@@ -48,7 +48,7 @@
         <p id="writing-status" class="writing-status" role="status" aria-live="polite"></p>
         <section id="evaluation-result" class="evaluation-result" aria-labelledby="result-heading" hidden>
           <div class="result-toolbar">
-            <div class="result-caption"><h2 id="result-heading">今回の練習</h2></div>
+            <div class="result-caption"><h2 id="result-heading">今回の練習</h2><p class="total-score"><strong id="total-score"></strong><span>点</span></p></div>
             <div class="overlay-control result-overlay"><label><input id="show-overlay" type="checkbox" checked> お手本を重ねる</label></div>
           </div>
           <div class="result-header">
@@ -56,10 +56,9 @@
               <div><dt>位置</dt><dd id="position-score"></dd></div>
               <div><dt>大きさ</dt><dd id="size-score"></dd></div>
               <div><dt>縦横比</dt><dd id="balance-score"></dd></div>
+              <div><dt>形状</dt><dd id="shape-score"></dd></div>
             </dl>
-            <p class="total-score"><strong id="total-score"></strong><span> / 100点</span></p>
           </div>
-          <div class="shape-score-row"><p>形状 <strong id="shape-score"></strong></p><span>位置と大きさをそろえて比較</span></div>
           <div class="feedback"><h3 id="feedback-focus"></h3><p id="feedback-comment"></p></div>
           <button id="save-record" class="save-button">この練習を保存する</button>
           <div id="saved-actions" class="saved-actions" role="group" aria-label="保存した練習の操作" hidden>
@@ -90,7 +89,7 @@
         <p id="growth-status" class="records-status" role="status" aria-live="polite"></p>
         <div id="growth-comparison-labels" class="comparison-pair comparison-headings" hidden><p class="comparison-label">最初の自分</p><p class="comparison-label">最高点の自分</p></div>
         <div id="growth-list" class="growth-list"></div>
-        <p class="development-note">練習数は保存した記録の件数、練習日数は練習時の日付の重複を除いた数です。記録を削除すると集計も変わります。</p>
+        <p class="development-note">練習数は保存した記録の件数、練習日数は練習時の日付の重複を除いた数です。</p>
       </section>
     </main>
     <footer>美文字ログ <span>日々の小さな練習を、成長の記録に。</span></footer>
@@ -125,8 +124,7 @@
     </div>
     <div class="practice-paper record-paper"><canvas id="record-overlay" width="1000" height="1000" aria-hidden="true"></canvas><canvas id="record-writing" width="1000" height="1000" role="img" aria-label="保存した筆跡"></canvas><img id="record-stamp" class="result-stamp" alt=""></div>
     <p id="record-image-status" class="save-status" role="status"></p>
-    <dl class="score-details" aria-label="保存した項目別の点数"><div><dt>位置</dt><dd id="record-position"></dd></div><div><dt>大きさ</dt><dd id="record-size"></dd></div><div><dt>縦横比</dt><dd id="record-balance"></dd></div></dl>
-    <div class="shape-score-row"><p>形状 <strong id="record-shape"></strong></p><span>総合点とは別の評価</span></div>
+    <dl class="score-details" aria-label="保存した項目別の点数"><div><dt>位置</dt><dd id="record-position"></dd></div><div><dt>大きさ</dt><dd id="record-size"></dd></div><div><dt>縦横比</dt><dd id="record-balance"></dd></div><div><dt>形状</dt><dd id="record-shape"></dd></div></dl>
     <div class="feedback"><h3 id="record-focus"></h3><p id="record-comment"></p></div>
     <button id="delete-record" class="delete-button">この記録を削除する</button>
     <div id="delete-confirmation" class="delete-confirmation" role="group" aria-label="記録の削除確認" hidden>

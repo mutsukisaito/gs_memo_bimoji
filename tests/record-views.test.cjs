@@ -47,13 +47,3 @@ test('比較には最初と最高点を使い、最新を使わず、見出し�
   assert.equal(card.children[0].children[0].children[0].tag, 'canvas');
   assert.equal(card.children[0].children[1].children[1].children[0].textContent, '95点');
 });
-
-test('比較対象のお手本か採点方式が違う場合だけ注記を出す', () => {
-  const { views } = load();
-  const first = record('first'), best = record('best');
-  for (const change of [() => { best.reference.image = 'different'; }, () => { best.reference.image = 'same'; best.evaluation.version = 'v2'; }]) {
-    change();
-    const card = views.createComparisonCard({ character: '原', first, best });
-    assert.equal(card.children[1].className, 'comparison-note');
-  }
-});

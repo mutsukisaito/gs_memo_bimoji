@@ -33,7 +33,7 @@
 
 標準のお手本にはKlee One Regularを同梱しています。[配布元](https://github.com/fontworks-fonts/Klee)／[SIL Open Font License 1.1](fonts/klee-one/OFL.txt)
 
-描画、記録カードの表示、保存・採点の処理を分離し、CSSを読みやすい形式に整理しました。Node.jsの標準テスト機能で74件の回帰テストを実行できます。
+描画、記録カードの表示、保存・採点の処理を分離し、CSSを読みやすい形式に整理しました。Node.jsの標準テスト機能で73件の回帰テストを実行できます。
 
 詳しい機能・使い方・起動方法・テスト手順は、[使い方・技術仕様（以前のREADME）](README_GUIDE.md)にまとめています。
 
