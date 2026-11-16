@@ -242,3 +242,5 @@ node --test tests/*.test.cjs
 CSSは従来の規則の順番と値を維持して複数行に整形しています。記録・バックアップの形式、保存キー、画像のサイズ、採点方式は今回の整理で変更していません。
 
 現在の仕様は[仕様書](docs/MVP_PLAN.md)、変更当時の経緯は[実装履歴](docs/IMPLEMENTATION_HISTORY.md)を参照してください。
+
+手書き・採点・保存・振り返りの仕組みや各JavaScriptファイルの役割は、初学者向けの[データの流れを図で理解する](docs/DATA_FLOW_GUIDE.md)で説明しています。
