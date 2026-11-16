@@ -1,3 +1,12 @@
+/* お手本は端末のインストール状況によらず同じ書体を使う。 */
+@font-face {
+  font-family: "Klee One";
+  src: url("../fonts/klee-one/KleeOne-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 :root {
   color-scheme: light;
   --ink: #30322f;

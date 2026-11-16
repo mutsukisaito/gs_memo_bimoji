@@ -17,7 +17,7 @@
   const stampImage = document.querySelector("#result-stamp");
   const status = document.querySelector("#writing-status");
   const grid = document.querySelector("#character-grid");
-  const fontFamily = '"Hiragino Mincho ProN", "Yu Mincho", "Noto Serif CJK JP", serif';
+  const fontFamily = '"Klee One"';
   const backupService = AppBackup.create(() => window.localStorage);
   const recordStore = backupService.records;
   const templateStore = backupService.templates;
@@ -44,6 +44,13 @@
   let referenceReady = false;
   let currentEvaluation = null;
   let drawingEnabled = false;
+
+  // CSSだけの指定ではCanvasで代替書体が使われるため、明示的に読込を開始する。
+  const referenceFontReady = document.fonts.load(`470px ${fontFamily}`).then(fonts => {
+    if (!fonts.length) throw new Error("お手本フォントが見つかりません。");
+  });
+  // 画像のお手本を先に選んだ場合も、未処理のPromise拒否を発生させない。
+  referenceFontReady.catch(() => {});
 
   // 描画モード・採点状態
   function setDrawingEnabled(enabled) {
@@ -99,14 +106,28 @@
     updateEvaluateButton();
   }
 
+  async function useFontReference(version, message = "") {
+    try {
+      await referenceFontReady;
+      if (version !== referenceVersion) return;
+      drawFontReference();
+      status.textContent = message;
+      finishReference();
+    } catch {
+      if (version !== referenceVersion) return;
+      status.textContent = "お手本フォントを読み込めません。通信状態を確認し、ページを再読み込みしてください。";
+    }
+  }
+
   function drawReference() {
     const version = ++referenceVersion;
     referenceReady = false;
     resetEvaluation();
-    drawFontReference();
+    referenceCanvas.width = 600;
     referenceCanvas.setAttribute("aria-label", `${selected.character}のお手本`);
     if (!selected.image) {
-      finishReference();
+      status.textContent = "お手本を読み込んでいます…";
+      useFontReference(version);
       return;
     }
     const image = new Image();
@@ -119,15 +140,14 @@
       try {
         referenceContext.getImageData(0, 0, 1, 1);
       } catch {
-        drawFontReference();
-        status.textContent = "この画像は採点に使えないため、フォントで表示しています";
+        useFontReference(version, "この画像は採点に使えないため、フォントで表示しています");
+        return;
       }
       finishReference();
     };
     image.onerror = () => {
       if (version !== referenceVersion) return;
-      status.textContent = "お手本画像を読み込めないため、フォントで表示しています";
-      finishReference();
+      useFontReference(version, "お手本画像を読み込めないため、フォントで表示しています");
     };
     image.src = selected.image;
   }
@@ -751,5 +771,4 @@
   });
 
   drawReference();
-  if (document.fonts) document.fonts.ready.then(drawReference);
 })();
