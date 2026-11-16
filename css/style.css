@@ -10,8 +10,10 @@
 .evaluate-button:disabled { opacity: .4; }
 .writing-status { margin: 12px 0 0; font-size: 11px; color: var(--muted); line-height: 1.8; }
 .evaluation-result { margin-top: 22px; padding: 22px 20px; border-radius: 10px; background: var(--paper); color: var(--ink); }
-.result-header { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr) auto; align-items: center; gap: 12px; }
-.result-header h2 { margin: 0; font-size: clamp(11px, 2.9vw, 14px); font-weight: 500; }
+.result-toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.result-caption h2 { margin: 0; font-size: 13px; line-height: 1.7; font-weight: 500; }
+.result-caption .evaluation-note { margin: 4px 0 0; }
+.result-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; }
 .total-score { margin: 0; color: #b5232d; white-space: nowrap; }
 .total-score strong { font-size: clamp(28px, 8vw, 40px); font-weight: 600; line-height: 1; }
 .total-score span { font-size: 11px; }
@@ -25,15 +27,18 @@
 .score-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 20px 0 0; padding-top: 18px; border-top: 1px solid #deded5; text-align: center; }
 .score-details dt { font-size: 11px; color: #686e61; }
 .score-details dd { margin: 6px 0 0; font-size: 18px; }
-.evaluation-result .result-overlay { align-items: flex-end; margin: 0 0 10px; }
+.evaluation-result .result-overlay { align-items: flex-end; margin: 0; flex-shrink: 0; }
+.result-overlay label { min-height: 44px; margin-top: -8px; }
 .result-header .score-details { margin: 0; padding: 0; border: 0; gap: 4px; min-width: 0; }
 .result-header .score-details dt { font-size: clamp(9px, 2.3vw, 11px); }
-.result-header .score-details dd { font-size: clamp(13px, 3.6vw, 18px); white-space: nowrap; }
+.result-header .score-details dd { font-size: clamp(20px, 4.9vw, 24px); white-space: nowrap; }
 @media(max-width:400px) {
   .evaluation-result { padding: 18px 16px; }
   .result-header { gap: 8px; }
   .total-score span { font-size: 9px; }
-  .result-header .eyebrow { font-size: 9px; }
+  .result-toolbar { gap: 8px; }
+  .result-caption h2, .result-overlay label { font-size: 11px; }
+  .result-caption .evaluation-note { font-size: 9px; }
 }
 .evaluation-note { font-size: 10px; color: #686e61; line-height: 1.8; margin: 18px 0 0; }
 

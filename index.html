@@ -44,9 +44,11 @@
         </div>
         <p id="writing-status" class="writing-status" role="status" aria-live="polite"></p>
         <section id="evaluation-result" class="evaluation-result" aria-labelledby="result-heading" hidden>
-          <div class="overlay-control result-overlay"><label><input id="show-overlay" type="checkbox" checked> お手本を重ねる</label></div>
+          <div class="result-toolbar">
+            <div class="result-caption"><h2 id="result-heading">今回の練習</h2><p class="evaluation-note">点数はあくまで目安です</p></div>
+            <div class="overlay-control result-overlay"><label><input id="show-overlay" type="checkbox" checked> お手本を重ねる</label></div>
+          </div>
           <div class="result-header">
-            <div><p class="eyebrow">今回の練習</p><h2 id="result-heading">配置の目安</h2></div>
             <dl class="score-details" aria-label="項目別の点数">
               <div><dt>位置</dt><dd id="position-score"></dd></div>
               <div><dt>大きさ</dt><dd id="size-score"></dd></div>
@@ -55,7 +57,6 @@
             <p class="total-score"><strong id="total-score"></strong><span> / 100点</span></p>
           </div>
           <div class="feedback"><h3 id="feedback-focus"></h3><p id="feedback-comment"></p></div>
-          <p class="evaluation-note">点数はあくまで目安です</p>
           <button id="save-record" class="save-button">この練習を保存する</button>
           <p id="save-status" class="save-status" role="status" aria-live="polite"></p>
         </section>
