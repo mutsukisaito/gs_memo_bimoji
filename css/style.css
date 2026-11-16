@@ -25,7 +25,7 @@ html { scroll-padding-top: 59px; }
 .feedback { margin-top: 22px; padding: 16px; border-left: 3px solid #ba8c68; background: #f1ece2; }
 .evaluation-result .feedback { border-left: 0; }
 .feedback h3 { margin: 0 0 8px; font-size: 14px; line-height: 1.6; }
-.feedback p { margin: 0; font-size: 13px; line-height: 1.9; }
+.feedback p { margin: 0; font-size: 13px; line-height: 1.52; }
 .overlay-control { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
 .overlay-control label { display: flex; align-items: center; min-height: 44px; font-size: 13px; cursor: pointer; }
 .overlay-control input { width: 19px; height: 19px; margin: 0 8px 0 0; accent-color: var(--ink); }
@@ -73,14 +73,25 @@ html { scroll-padding-top: 59px; }
 .record-card-info strong { display: block; font-size: 12px; font-weight: 500; }
 .record-card-info time { display: block; font-size: 9px; line-height: 1.7; margin-top: 4px; color: #686e61; overflow-wrap: anywhere; }
 .record-total { color: #b5232d; margin: 18px 0; }
-.record-summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0; }
+.record-heading { display: flex; align-items: baseline; gap: 12px; min-width: 0; }
+.record-heading h2 { white-space: nowrap; }
+#record-date { margin: 0; white-space: nowrap; }
+#record-dialog .close-button { flex-shrink: 0; }
+.record-summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 9px; }
 .record-summary .overlay-control { margin: 0; }
 .record-summary .record-total { margin: 0 0 0 auto; text-align: right; white-space: nowrap; }
-#record-dialog .score-details { border-top: 0; padding-top: 0; }
-#record-dialog .feedback { border-left: 0; }
+#record-dialog .score-details { border-top: 0; padding-top: 0; margin-top: 14px; }
+#record-dialog .score-details>div { display: flex; align-items: baseline; justify-content: center; gap: 5px; white-space: nowrap; }
+#record-dialog .score-details dt { font-size: clamp(9px, 2.24vw, 11px); }
+#record-dialog .score-details dd { margin: 0; font-size: clamp(14px, 3.66vw, 18px); }
+#record-dialog .feedback { border-left: 0; margin-top: 15.4px; }
 .record-total strong { font-size: 34px; }
 .record-total span { font-size: 12px; }
 @media(max-width:400px) {
+  .record-heading { gap: 8px; }
+  #record-title { font-size: 18px; }
+  #record-date { font-size: 9px; letter-spacing: 0; }
+  #record-dialog .score-details>div { gap: 3px; }
   .record-summary { gap: 8px; }
   .record-summary label { font-size: 11px; }
   .record-total strong { font-size: 28px; }
@@ -113,10 +124,20 @@ html { scroll-padding-top: 59px; }
 .comparison-side canvas { background: var(--paper); aspect-ratio: 1; height: auto; }
 .comparison-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 4px; margin-top: 10px; white-space: nowrap; }
 .comparison-side time { margin-left: auto; text-align: right; font-size: clamp(8px, 2.03vw, 10px); color: var(--muted); line-height: 1.7; }
-.comparison-score { margin: 0; font-size: clamp(13px, 3.25vw, 16px); }
+.comparison-score { margin: 0; font-size: clamp(19.5px, 4.875vw, 24px); }
 .comparison-note { font-size: 11px; line-height: 1.9; color: var(--accent); margin-bottom: 0; }
 
 /* 記録のバックアップ */
+.backup-notice { display: grid; grid-template-columns: minmax(0, 1fr) 44px; align-items: start; gap: 8px; margin-top: 10px; }
+.backup-notice:has(#backup-status:empty) { display: none; }
+.backup-notice .save-status { margin: 0; padding-top: 8px; }
+#dismiss-backup-status { width: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 5px; color: var(--muted); background: transparent; font-size: 24px; }
+.data-management { margin-top: 64px; padding-top: 16px; border-top: 1px solid #53564e; font-size: 12px; }
+.data-management summary { min-height: 44px; padding: 14px 0; cursor: pointer; color: var(--muted); }
+.data-management p { color: var(--muted); line-height: 1.8; }
+.data-management .delete-button { color: #ffb4ae; border-color: #a56864; margin-top: 16px; }
+#delete-all-dialog h2 { font-size: 20px; }
+#delete-all-dialog .delete-confirmation { background: transparent; border: 0; padding: 0; }
 .backup-actions { display: flex; gap: 8px; margin-left: auto; }
 .backup-actions>button, .import-label { min-height: 44px; display: flex; align-items: center; justify-content: center; font: inherit; font-size: 12px; color: var(--paper); background: transparent; border: 1px solid #999e90; border-radius: 5px; padding: 8px; white-space: nowrap; }
 .import-label { position: relative; overflow: hidden; }

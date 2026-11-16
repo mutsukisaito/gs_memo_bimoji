@@ -6,13 +6,13 @@
   <meta name="theme-color" content="#30322f">
   <meta name="description" content="スキマ時間に一文字。お手本を見ながらスマホで練習する美文字ログ。">
   <title>美文字ログ</title>
-  <link rel="stylesheet" href="css/style.css?v=20261116-toast-tabs">
+  <link rel="stylesheet" href="css/style.css?v=20261116-record-spacing">
   <script src="js/characters.js" defer></script>
   <script src="js/evaluation.js" defer></script>
   <script src="js/records.js?v=20261116-growth-best" defer></script>
   <script src="js/templates.js" defer></script>
-  <script src="js/backup.js" defer></script>
-  <script src="js/app.js?v=20261116-toast-tabs" defer></script>
+  <script src="js/backup.js?v=20261116-data-management" defer></script>
+  <script src="js/app.js?v=20261116-dismiss-notice" defer></script>
 </head>
 <body>
   <div class="app">
@@ -71,9 +71,14 @@
         <div class="section-heading records-heading"><h2 id="records-heading">練習の記録</h2><div class="backup-actions"><button id="export-records" aria-label="全記録と登録お手本をバックアップ">バックアップ</button><label class="import-label" for="import-records">読込<input id="import-records" type="file" accept=".json,application/json" class="file-input" aria-label="バックアップファイルを読み込む"></label></div></div>
         <span id="records-count" class="visually-hidden"></span>
         <div class="records-toolbar"><span>表示</span><select id="record-filter" aria-label="文字で絞り込む"><option value="">すべての文字</option></select><select id="record-sort" aria-label="並べ替え"><option value="date-desc">日付の新しい順</option><option value="date-asc">日付の古い順</option><option value="score-desc">点数の高い順</option><option value="score-asc">点数の低い順</option></select></div>
-        <p id="backup-status" class="save-status" role="status" aria-live="polite"></p>
+        <div class="backup-notice"><p id="backup-status" class="save-status" role="status" aria-live="polite"></p><button id="dismiss-backup-status" type="button" aria-label="バックアップ・読込の通知を閉じる">×</button></div>
         <p id="records-status" class="records-status" role="status" aria-live="polite"></p>
         <div id="records-list" class="records-list"></div>
+        <details id="data-management" class="data-management">
+          <summary>データ管理</summary>
+          <p>このブラウザに保存した美文字ログのデータを削除します。</p>
+          <button id="delete-all-data" type="button" class="delete-button">全データを削除</button>
+        </details>
       </section>
       <section id="growth-view" aria-labelledby="growth-heading" hidden>
         <div class="section-heading records-heading"><h2 id="growth-heading">成長の証</h2></div>
@@ -109,7 +114,7 @@
     </form>
   </dialog>
   <dialog id="record-dialog" aria-labelledby="record-title">
-    <div class="dialog-header"><div><p id="record-date" class="eyebrow"></p><h2 id="record-title"></h2></div><button id="close-record" class="close-button" aria-label="記録の詳細を閉じる">×</button></div>
+    <div class="dialog-header"><div class="record-heading"><h2 id="record-title"></h2><p id="record-date" class="eyebrow"></p></div><button id="close-record" class="close-button" aria-label="記録の詳細を閉じる">×</button></div>
     <div class="record-summary">
       <div class="overlay-control"><label><input id="record-show-overlay" type="checkbox" checked> お手本・スタンプを重ねる</label></div>
       <p class="record-total"><strong id="record-score"></strong><span> / 100点</span></p>
@@ -132,6 +137,14 @@
     <p class="evaluation-note">既存の記録・お手本は残して追加します。同じIDの記録、同じ文字名のお手本は読み飛ばし、内容が異なる場合も既存データを優先します。</p>
     <div class="import-actions"><button id="cancel-import">キャンセル</button><button id="confirm-import">追加する</button></div>
     <p id="import-status" class="save-status" role="status" aria-live="polite"></p>
+  </dialog>
+  <dialog id="delete-all-dialog" aria-labelledby="delete-all-title" aria-describedby="delete-all-description">
+    <div class="dialog-header"><h2 id="delete-all-title">全データを削除しますか？</h2></div>
+    <p id="delete-all-description" class="dialog-note">このブラウザに保存した練習記録と登録したお手本がすべて消え、元に戻せません。文字の絞り込みに関係なく全件が対象です。書きかけの内容も消えます。</p>
+    <p class="dialog-note">残したいデータがある場合は、先にバックアップして保存先を確認してください。</p>
+    <button id="backup-before-delete" type="button" class="template-add">先にバックアップする</button>
+    <p id="delete-all-status" class="save-status" role="status" aria-live="polite"></p>
+    <div class="delete-confirmation"><div><button id="cancel-delete-all" type="button" class="cancel-delete" autofocus>キャンセル</button><button id="confirm-delete-all" type="button" class="confirm-delete">削除する</button></div></div>
   </dialog>
   <div id="toast" class="toast" popover="manual" role="status" aria-live="polite" aria-atomic="true"></div>
 </body>

@@ -14,6 +14,53 @@ function memory() {
 }
 const json = (savedRecords = [], savedTemplates = [], version = 2) => JSON.stringify({ format: "bimoji-log-backup", version, exportedAt: "2026-11-16T00:00:00Z", records: savedRecords, ...(version === 2 ? { templates: savedTemplates } : {}) });
 
+test("全削除は統合・旧キーの記録とお手本だけを削除し、再読込でも復活しない", () => {
+  const storage = memory(); const service = backup.create(() => storage);
+  service.records.save(record("a")); service.templates.save(template("原"));
+  storage.setItem(records.KEY, JSON.stringify({ version: 1, records: [record("legacy")] }));
+  storage.setItem(templates.KEY, JSON.stringify({ version: 1, templates: [template("夢")] }));
+  storage.setItem("another-app", "keep");
+  const exported = service.exportBackup();
+  service.clearAll();
+  for (const key of [backup.KEY, records.KEY, templates.KEY]) assert.equal(storage.getItem(key), null);
+  assert.equal(storage.getItem("another-app"), "keep");
+  const reopened = backup.create(() => storage);
+  assert.equal(reopened.records.read().length, 0);
+  assert.equal(reopened.templates.read().length, 0);
+  reopened.clearAll();
+  reopened.importBackup(exported);
+  assert.equal(reopened.records.read()[0].id, "a");
+  assert.equal(reopened.templates.read()[0].character, "原");
+});
+
+test("壊れた保存データも明示的な全削除で初期化できる", () => {
+  const storage = memory(); storage.setItem(backup.KEY, "broken");
+  const service = backup.create(() => storage);
+  service.clearAll();
+  assert.equal(service.records.read().length, 0);
+  assert.equal(service.templates.read().length, 0);
+});
+
+test("削除失敗を通知し、旧キー削除途中の失敗でも過去のデータを復活させない", () => {
+  const storage = memory(); const service = backup.create(() => storage);
+  service.records.save(record("a"));
+  const saved = storage.getItem(backup.KEY);
+  const write = storage.setItem;
+  storage.setItem = () => { throw new Error("denied"); };
+  assert.throws(() => service.clearAll(), /削除を完了できません/);
+  assert.equal(storage.getItem(backup.KEY), saved);
+  storage.setItem = write;
+  storage.setItem(records.KEY, JSON.stringify({ version: 1, records: [record("legacy")] }));
+  const remove = storage.removeItem;
+  storage.removeItem = () => { throw new Error("denied"); };
+  assert.throws(() => service.clearAll(), /削除を完了できません/);
+  assert.equal(service.records.read().length, 0);
+  storage.removeItem = remove;
+  service.clearAll();
+  assert.equal(storage.getItem(backup.KEY), null);
+  assert.equal(storage.getItem(records.KEY), null);
+});
+
 test("v2に文字名・画像と記録を含め、空の保存先に完全復元する", () => {
   const a = memory(); const original = backup.create(() => a);
   original.records.save(record("a")); original.templates.save(template("原"));

@@ -73,6 +73,18 @@ const AppBackup = (() => {
     }
     return {
       records, templates,
+      clearAll() {
+        try {
+          const storage = getStorage();
+          // 旧キーの削除途中で失敗しても、古い記録を再移行しないよう空の状態を先に保存する。
+          storage.setItem(KEY, JSON.stringify({ version: 1, records: null, templates: null }));
+          storage.removeItem(PracticeRecords.KEY);
+          storage.removeItem(CustomTemplates.KEY);
+          storage.removeItem(KEY);
+        } catch {
+          throw new Error("データの削除を完了できませんでした。ストレージの利用設定を確認し、もう一度お試しください。");
+        }
+      },
       exportBackup() {
         return JSON.stringify({ format: "bimoji-log-backup", version: 2, exportedAt: new Date().toISOString(), records: records.read(), templates: templates.read() }, null, 2);
       },

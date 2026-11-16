@@ -421,9 +421,11 @@ saveButton.addEventListener("click", () => {
   }
 });
 
+let restartWritingOnReturn = false;
 document.querySelector("#view-saved-record").addEventListener("click", () => {
   if (!currentDraft) return;
   const id = currentDraft.id;
+  restartWritingOnReturn = true;
   document.querySelector('[data-view="records"]').click();
   openRecord(id);
 });
@@ -447,6 +449,12 @@ for (const button of document.querySelectorAll("[data-view]")) {
     }
     if (button.dataset.view === "records") renderRecords();
     if (button.dataset.view === "growth") renderGrowth();
+    if (button.dataset.view === "writing" && restartWritingOnReturn) {
+      // 保存した記録の確認から戻ったら、同じお手本で次の練習を始める。
+      restartWritingOnReturn = false;
+      clearWriting();
+      setDrawingEnabled(true);
+    }
   });
 }
 recordFilter.addEventListener("change", () => renderRecords());
@@ -606,6 +614,10 @@ function renderGrowth() {
 }
 
 const backupStatus = document.querySelector("#backup-status");
+document.querySelector("#dismiss-backup-status").addEventListener("click", () => {
+  backupStatus.textContent = "";
+  document.querySelector("#export-records").focus({ preventScroll: true });
+});
 const importInput = document.querySelector("#import-records");
 const importDialog = document.querySelector("#import-dialog");
 const importStatus = document.querySelector("#import-status");
@@ -613,7 +625,7 @@ const confirmImport = document.querySelector("#confirm-import");
 let pendingImport = null;
 let importReadVersion = 0;
 
-document.querySelector("#export-records").addEventListener("click", () => {
+function exportBackup(statusTarget = backupStatus) {
   let url;
   try {
     const json = backupService.exportBackup();
@@ -626,14 +638,15 @@ document.querySelector("#export-records").addEventListener("click", () => {
     document.body.append(link);
     link.click();
     link.remove();
-    backupStatus.textContent = `${filename}を書き出しました。端末のダウンロード先を確認してください。`;
+    statusTarget.textContent = `${filename}を書き出しました。端末のダウンロード先を確認してください。`;
   } catch (error) {
-    backupStatus.textContent = error.message;
+    statusTarget.textContent = error.message;
   } finally {
     // ダウンロードの開始前にURLを破棄しないよう、少し後で解放する。
     if (url) window.setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
-});
+}
+document.querySelector("#export-records").addEventListener("click", () => exportBackup());
 
 function showImportSummary(plan) {
   const describe = (label, part) => `${label} ${part.total}件：追加 ${part.additions.length}件、重複 ${part.duplicates}件、内容違い ${part.conflicts}件。`;
@@ -803,6 +816,45 @@ document.querySelector("#confirm-remove-template").addEventListener("click", () 
 window.addEventListener("storage", event => {
   if ([CustomTemplates.KEY, AppBackup.KEY, null].includes(event.key)) {
     if (dialog.open) renderCharacters();
+  }
+});
+
+const deleteAllDialog = document.querySelector("#delete-all-dialog");
+const deleteAllStatus = document.querySelector("#delete-all-status");
+document.querySelector("#delete-all-data").addEventListener("click", () => {
+  deleteAllStatus.textContent = "";
+  deleteAllDialog.showModal();
+});
+document.querySelector("#cancel-delete-all").addEventListener("click", () => deleteAllDialog.close());
+deleteAllDialog.addEventListener("close", () => document.querySelector("#delete-all-data").focus());
+document.querySelector("#backup-before-delete").addEventListener("click", () => exportBackup(deleteAllStatus));
+document.querySelector("#confirm-delete-all").addEventListener("click", () => {
+  try {
+    backupService.clearAll();
+    // 削除済みデータを画面上の下書きや読込処理から保存し直さないよう初期化する。
+    importReadVersion++;
+    pendingImport = null;
+    templateImageVersion++;
+    pendingTemplateImage = null;
+    document.querySelector("#template-form").reset();
+    templateSave.disabled = true;
+    templateStatus.textContent = "";
+    document.querySelector("#template-preview-area").hidden = true;
+    restartWritingOnReturn = false;
+    selected = CHARACTERS.find(item => item.character === "原") || CHARACTERS[0];
+    category = selected.category;
+    clearWriting();
+    drawReference();
+    recordFilter.value = "";
+    recordSort.value = "date-desc";
+    backupStatus.textContent = "";
+    renderRecords();
+    renderGrowth();
+    renderCharacters();
+    deleteAllDialog.close();
+    showToast("全データを削除しました。");
+  } catch (error) {
+    deleteAllStatus.textContent = error.message;
   }
 });
 
