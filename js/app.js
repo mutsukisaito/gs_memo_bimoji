@@ -82,8 +82,6 @@ function drawReference() {
   resetEvaluation();
   drawFontReference();
   referenceCanvas.setAttribute("aria-label", `${selected.character}のお手本`);
-  document.querySelector("#character-category").textContent = selected.category === "custom" ? "登録お手本" : selected.category === "kanji" ? "漢字" : "ひらがな";
-  renderPreviousFeedback();
   if (!selected.image) {
     finishReference();
     return;
@@ -156,7 +154,7 @@ writingCanvas.addEventListener("pointerdown", event => {
   drawSegment(null, activeStroke[0]);
   clearButton.disabled = false;
   updateEvaluateButton();
-  status.textContent = "何度でも書き直せます";
+  status.textContent = "";
 });
 
 writingCanvas.addEventListener("pointermove", event => {
@@ -179,7 +177,7 @@ function clearWriting() {
   resetEvaluation();
   writingContext.clearRect(0, 0, 1000, 1000);
   clearButton.disabled = true;
-  status.textContent = "白い枠に一文字書いてみましょう";
+  status.textContent = "";
 }
 clearButton.addEventListener("click", clearWriting);
 
@@ -237,7 +235,7 @@ evaluateButton.addEventListener("click", () => {
     writingCanvas.setAttribute("aria-label", `${selected.character}の採点済みの筆跡。書き直すボタンで再び入力できます。`);
     evaluateButton.textContent = "採点済み";
     updateEvaluateButton();
-    status.textContent = `${evaluation.score}点。下の改善コメントを確認しましょう。書き直すと、もう一度練習できます。`;
+    status.textContent = "";
   } catch (error) {
     status.textContent = error.message;
   }
@@ -382,7 +380,6 @@ saveButton.addEventListener("click", () => {
     saveButton.disabled = true;
     saveButton.textContent = "保存済み";
     saveStatus.textContent = "保存しました。「記録」タブから見返せます。";
-    renderPreviousFeedback();
     renderGrowth();
   } catch (error) {
     saveStatus.textContent = error.message;
@@ -401,7 +398,6 @@ for (const button of document.querySelectorAll("[data-view]")) {
     }
     if (button.dataset.view === "records") renderRecords();
     if (button.dataset.view === "growth") renderGrowth();
-    if (button.dataset.view === "writing") renderPreviousFeedback();
   });
 }
 recordFilter.addEventListener("change", () => renderRecords());
@@ -485,7 +481,6 @@ document.querySelector("#confirm-delete").addEventListener("click", () => {
     recordStore.remove(openRecordId);
     recordDialog.close();
     renderRecords("記録を削除しました。");
-    renderPreviousFeedback();
     renderGrowth();
   } catch (error) {
     document.querySelector("#delete-status").textContent = error.message;
@@ -495,30 +490,12 @@ document.querySelector("#confirm-delete").addEventListener("click", () => {
 window.addEventListener("storage", event => {
   if (![PracticeRecords.KEY, AppBackup.KEY, null].includes(event.key)) return;
   const records = renderRecords();
-  renderPreviousFeedback();
   renderGrowth();
   if (recordDialog.open && records && !records.some(record => record.id === openRecordId)) {
     recordDialog.close();
     recordsStatus.textContent = "別のタブでこの記録が削除されました。";
   }
 });
-
-function renderPreviousFeedback() {
-  const date = document.querySelector("#previous-date");
-  const comment = document.querySelector("#previous-comment");
-  date.textContent = "";
-  try {
-    const previous = PracticeRecords.latestFor(recordStore.read(), selected.character);
-    if (!previous) {
-      comment.textContent = `「${selected.character}」の記録はまだありません。まずは一文字書いて保存してみましょう。`;
-      return;
-    }
-    date.textContent = `「${selected.character}」 · ${formatDate(previous.createdAt)} · ${previous.evaluation.score}点`;
-    comment.textContent = previous.evaluation.comment;
-  } catch (error) {
-    comment.textContent = error.message;
-  }
-}
 
 function comparisonSide(record, label) {
   const side = document.createElement("div");
@@ -668,7 +645,6 @@ confirmImport.addEventListener("click", () => {
     importDialog.close();
     recordFilter.value = "";
     renderRecords();
-    renderPreviousFeedback();
     renderGrowth();
     backupStatus.textContent = `記録 ${result.records.added}件・登録お手本 ${result.templates.added}件を追加しました。重複 ${result.records.duplicates + result.templates.duplicates}件、内容違い ${result.records.conflicts + result.templates.conflicts}件は読み飛ばしました。`;
   } catch (error) {

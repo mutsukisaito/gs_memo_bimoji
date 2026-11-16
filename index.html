@@ -16,7 +16,7 @@
 </head>
 <body>
   <div class="app">
-    <header class="header"><h1>美文字ログ<span>一文字ずつ、私の字に。</span></h1><span class="edition">練習帳</span></header>
+    <header class="header"><h1>美文字ログ</h1><span class="edition">練習帳</span></header>
     <nav class="tabs" aria-label="メインメニュー">
       <button class="tab active" data-view="writing" aria-current="page" aria-controls="writing-view">書く</button>
       <button class="tab" data-view="records" aria-controls="records-view">記録</button>
@@ -25,17 +25,11 @@
     <main>
       <div id="writing-view">
       <section class="reference-section" aria-labelledby="reference-heading">
-        <div class="section-heading"><h2 id="reference-heading">今日の一文字</h2><button id="choose-character" class="text-button" aria-haspopup="dialog">文字を選ぶ <span aria-hidden="true">↗</span></button></div>
         <div class="reference-row">
-          <div class="vertical-label" aria-hidden="true">お手本</div>
+          <h2 id="reference-heading">今日の一文字</h2>
           <div class="reference-paper"><canvas id="reference-canvas" width="600" height="600" role="img" aria-label="原のお手本"></canvas></div>
-          <div class="reference-note"><span id="character-category">漢字</span><p>形を見て、<br>ゆっくりと。</p></div>
+          <button id="choose-character" class="text-button" aria-haspopup="dialog">文字を選ぶ <span aria-hidden="true">↗</span></button>
         </div>
-        <aside id="previous-feedback" class="previous-feedback" aria-labelledby="previous-heading">
-          <h2 id="previous-heading">前回の練習から</h2>
-          <p id="previous-date" class="previous-date"></p>
-          <p id="previous-comment" aria-live="polite"></p>
-        </aside>
       </section>
       <section aria-labelledby="practice-heading">
         <div class="section-heading practice-heading"><h2 id="practice-heading">書いてみましょう</h2><span>指・ペンで入力</span></div>
@@ -48,7 +42,7 @@
           <button id="clear" class="clear-button" disabled><span aria-hidden="true">↺</span> 書き直す</button>
           <button id="evaluate" class="evaluate-button" disabled>採点する</button>
         </div>
-        <p id="writing-status" class="writing-status" role="status" aria-live="polite">白い枠に一文字書いてみましょう</p>
+        <p id="writing-status" class="writing-status" role="status" aria-live="polite"></p>
         <section id="evaluation-result" class="evaluation-result" aria-labelledby="result-heading" hidden>
           <div class="result-header">
             <div><p class="eyebrow">今回の練習</p><h2 id="result-heading">配置の目安</h2></div>
