@@ -4,9 +4,9 @@
 const HandwritingEvaluation = (() => {
   const VERSION = "layout-v1";
   const STAMPS = [
-    { minimum: 85, label: "たいへんよくできました", image: "sozai/grade1_taihenyoku.png" },
-    { minimum: 60, label: "がんばりました", image: "sozai/grade3_ganbarimashita.png" },
-    { minimum: 0, label: "もうすこしがんばりましょう", image: "sozai/grade4_mousukoshi.png" },
+    { minimum: 85, label: "たいへんよくできました", image: "img/grade1_taihenyoku.png" },
+    { minimum: 60, label: "がんばりました", image: "img/grade3_ganbarimashita.png" },
+    { minimum: 0, label: "もうすこしがんばりましょう", image: "img/grade4_mousukoshi.png" },
   ];
 
   // 白背景画像と透過Canvasを同じ基準で扱う。ガイド線はCanvas外のCSSで描画する。

@@ -20,7 +20,7 @@ function record(id = "first", createdAt = "2026-11-15T12:00:00.000Z") {
     evaluation: {
       version: "layout-v1", score: 80, scores: { position: 90, size: 80, balance: 70 },
       focus: "次は、大きさを意識", comment: "もう少し大きく書いてみましょう。",
-      stamp: { image: "sozai/grade3_ganbarimashita.png", label: "がんばりました", minimum: 60 },
+      stamp: { image: "img/grade3_ganbarimashita.png", label: "がんばりました", minimum: 60 },
     },
     reference: {
       image: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aQ1kAAAAASUVORK5CYII=",
@@ -309,4 +309,15 @@ test("空・1件・不明な並べ替えと、タイムゾーンの異なる日�
   const earlier = record("earlier", "2026-11-16T08:00:00+09:00");
   const later = record("later", "2026-11-16T00:00:00Z");
   assert.equal(records.sortRecords([earlier, later], "unknown").map(item => item.id).join(), "later,earlier");
+});
+
+test("以前保存したスタンプのパスをimgへ読み替え、元の保存データは変更しない", () => {
+  const storage = mockStorage(); const store = records.createStore(() => storage);
+  const names = ["grade1_taihenyoku.png", "grade3_ganbarimashita.png", "grade4_mousukoshi.png"];
+  const legacy = names.map(name => { const item = record(name); item.evaluation.stamp.image = `sozai/${name}`; return item; });
+  const raw = JSON.stringify({ version: 1, records: legacy });
+  storage.setItem(records.KEY, raw);
+  for (const item of store.read()) assert.equal(item.evaluation.stamp.image, `img/${item.id}`);
+  assert.equal(storage.getItem(records.KEY), raw);
+  assert.ok(JSON.parse(store.exportBackup()).records.every(item => item.evaluation.stamp.image.startsWith("img/")));
 });

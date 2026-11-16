@@ -3,7 +3,18 @@
 const PracticeRecords = (() => {
   const KEY = "bimoji.records.v1";
   const MAX_BACKUP_BYTES = 10 * 1024 * 1024;
-  const stamps = new Set(["sozai/grade1_taihenyoku.png", "sozai/grade3_ganbarimashita.png", "sozai/grade4_mousukoshi.png"]);
+  // 以前保存した記録・バックアップの旧パスも受け付け、表示時はimgへ読み替える。
+  const legacyStamps = {
+    "sozai/grade1_taihenyoku.png": "img/grade1_taihenyoku.png",
+    "sozai/grade3_ganbarimashita.png": "img/grade3_ganbarimashita.png",
+    "sozai/grade4_mousukoshi.png": "img/grade4_mousukoshi.png",
+  };
+  const stamps = new Set([...Object.keys(legacyStamps), ...Object.values(legacyStamps)]);
+
+  function normalizeRecord(record) {
+    const image = legacyStamps[record.evaluation.stamp.image];
+    return image ? { ...record, evaluation: { ...record.evaluation, stamp: { ...record.evaluation.stamp, image } } } : record;
+  }
   const scoreValid = value => Number.isInteger(value) && value >= 0 && value <= 100;
   const textValid = value => typeof value === "string" && value.length > 0;
   function dateValid(value) {
@@ -40,7 +51,7 @@ const PracticeRecords = (() => {
       if (backup.format !== "bimoji-log-backup" || backup.version !== 1
         || !textValid(backup.exportedAt) || !Number.isFinite(Date.parse(backup.exportedAt))
         || !validRecords(backup.records)) throw new Error();
-      return backup.records;
+      return backup.records.map(normalizeRecord);
     } catch {
       throw new Error("美文字ログのバックアップとして読み込めません。形式・バージョン・記録の内容を確認してください。保存データは変更していません。");
     }
@@ -80,7 +91,7 @@ const PracticeRecords = (() => {
       try {
         const saved = JSON.parse(raw);
         if (saved.version !== 1 || !validRecords(saved.records)) throw new Error();
-        return saved.records.sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+        return saved.records.map(normalizeRecord).sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
       } catch {
         throw new Error("保存データを読み込めません。既存データを保護するため保存・削除を停止しています。ブラウザのデータを消さずにご確認ください。");
       }
@@ -116,7 +127,7 @@ const PracticeRecords = (() => {
         if (!validRecord(record)) throw new Error("記録の形式が正しくないため保存できませんでした。");
         const records = read();
         if (records.some(saved => saved.id === record.id)) return;
-        write([record, ...records]);
+        write([normalizeRecord(record), ...records]);
       },
       remove(id) {
         const records = read();
@@ -162,5 +173,5 @@ const PracticeRecords = (() => {
     return [...records].sort(comparators[order] || newestFirst);
   }
 
-  return { KEY, MAX_BACKUP_BYTES, createStore, localDate, summarize, latestFor, validRecords, canonical, sortRecords };
+  return { KEY, MAX_BACKUP_BYTES, createStore, localDate, summarize, latestFor, validRecords, canonical, sortRecords, normalizeRecord };
 })();

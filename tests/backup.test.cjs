@@ -7,7 +7,7 @@ const source = ["records", "templates", "backup"].map(name => fs.readFileSync(pa
 const { AppBackup: backup, PracticeRecords: records, CustomTemplates: templates } = vm.runInNewContext(`${source}\n({ AppBackup, PracticeRecords, CustomTemplates });`);
 const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aQ1kAAAAASUVORK5CYII=";
 const template = character => ({ character, image: png, updatedAt: "2026-11-16T00:00:00Z" });
-const record = id => ({ id, character: "原", createdAt: "2026-11-16T00:00:00Z", localDate: "2026-11-16", strokes: [[{ x: .1, y: .1 }, { x: .9, y: .9 }]], evaluation: { version: "layout-v1", score: 80, scores: { position: 80, size: 80, balance: 80 }, focus: "大きさ", comment: "少し大きく", stamp: { image: "sozai/grade3_ganbarimashita.png", label: "がんばりました" } }, reference: { image: png, kind: "image", version: "reference-v1" } });
+const record = id => ({ id, character: "原", createdAt: "2026-11-16T00:00:00Z", localDate: "2026-11-16", strokes: [[{ x: .1, y: .1 }, { x: .9, y: .9 }]], evaluation: { version: "layout-v1", score: 80, scores: { position: 80, size: 80, balance: 80 }, focus: "大きさ", comment: "少し大きく", stamp: { image: "img/grade3_ganbarimashita.png", label: "がんばりました" } }, reference: { image: png, kind: "image", version: "reference-v1" } });
 function memory() {
   const map = new Map();
   return { getItem: key => map.get(key) ?? null, setItem: (key, value) => map.set(key, value), removeItem: key => map.delete(key) };
@@ -107,4 +107,15 @@ test("確認後の保存も維持し、壊れた統合データやお手本を�
   storage.setItem(backup.KEY, "broken");
   assert.throws(() => service.exportBackup()); assert.throws(() => service.importBackup(incoming));
   assert.equal(storage.getItem(backup.KEY), "broken");
+});
+
+test("旧スタンプのパスだけが異なるバックアップは重複として扱う", () => {
+  const storage = memory(); const service = backup.create(() => storage);
+  service.records.save(record("same"));
+  const old = record("same"); old.evaluation.stamp.image = "sozai/grade3_ganbarimashita.png";
+  const plan = service.previewImport(json([old]));
+  assert.equal(plan.records.duplicates, 1); assert.equal(plan.records.conflicts, 0);
+  const oldNew = record("legacy-new"); oldNew.evaluation.stamp.image = "sozai/grade3_ganbarimashita.png";
+  assert.equal(service.importBackup(json([oldNew])).records.added, 1);
+  assert.equal(service.records.read().find(item => item.id === "legacy-new").evaluation.stamp.image, "img/grade3_ganbarimashita.png");
 });

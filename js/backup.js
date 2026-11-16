@@ -11,7 +11,7 @@ const AppBackup = (() => {
         || !PracticeRecords.validRecords(backup.records)) throw new Error();
       const templates = backup.version === 1 ? [] : backup.templates;
       if (!CustomTemplates.validTemplates(templates)) throw new Error();
-      return { records: backup.records, templates };
+      return { records: backup.records.map(PracticeRecords.normalizeRecord), templates };
     } catch {
       throw new Error("美文字ログのバックアップとして読み込めません。形式・バージョン・記録・お手本を確認してください。保存データは変更していません。");
     }
