@@ -23,7 +23,7 @@ html { scroll-padding-top: 59px; }
 .total-score strong { font-size: clamp(28px, 8vw, 40px); font-weight: 600; line-height: 1; }
 .total-score span { font-size: 11px; }
 .feedback { margin-top: 22px; padding: 16px; border-left: 3px solid #ba8c68; background: #f1ece2; }
-.evaluation-result .feedback { border-left: 0; }
+.evaluation-result .feedback { border-left: 0; margin-top: 11px; }
 .feedback h3 { margin: 0 0 8px; font-size: 14px; line-height: 1.6; }
 .feedback p { margin: 0; font-size: 13px; line-height: 1.52; }
 .overlay-control { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; }
@@ -100,6 +100,7 @@ html { scroll-padding-top: 59px; }
 .record-paper { border: 1px solid #d5d7cc; }
 #record-overlay { position: absolute; inset: 0; pointer-events: none; }
 .delete-button { display: block; min-height: 44px; width: 100%; margin-top: 22px; border: 1px solid #b5232d; color: #a71f28; background: transparent; border-radius: 6px; font-size: 13px; }
+#delete-record { width: fit-content; max-width: 100%; padding: 10px 20px; }
 @media(max-width:350px) { .records-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
 .delete-confirmation { border: 1px solid #d8b1aa; border-radius: 7px; padding: 14px; margin-top: 20px; background: #fcf1ed; }
