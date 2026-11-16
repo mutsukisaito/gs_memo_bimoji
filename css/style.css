@@ -1402,3 +1402,32 @@ html  {
 .drawing-toggle:disabled  {
   opacity: .45;
 }
+
+/* 形状は従来の配置点・総合点に混ぜず、独立した点数として表示する。 */
+.shape-score-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 14px;
+}
+.shape-score-row p {
+  margin: 0;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.shape-score-row strong {
+  margin-left: 8px;
+  font-size: 20px;
+  font-weight: 500;
+}
+.shape-score-row>span {
+  color: #686e61;
+  font-size: 10px;
+  text-align: right;
+}
+@media (max-width: 360px) {
+  .shape-score-row {
+    flex-wrap: wrap;
+  }
+}

@@ -166,3 +166,28 @@ test("旧スタンプのパスだけが異なるバックアップは重複と�
   assert.equal(service.importBackup(json([oldNew])).records.added, 1);
   assert.equal(service.records.read().find(item => item.id === "legacy-new").evaluation.stamp.image, "img/grade3_ganbarimashita.png");
 });
+
+test("形状点と方式IDをJSONで復元し、旧記録の未採点状態・従来の総合点を維持する", () => {
+  const memoryA = memory();
+  const original = backup.create(() => memoryA);
+  const saved = record("shape"); saved.evaluation.shape = { version: "shape-v1", score: 67 };
+  original.records.save(saved); original.records.save(record("old"));
+  const storage = memory(), restored = backup.create(() => storage);
+  const exported = original.exportBackup();
+  restored.importBackup(exported);
+  const shape = restored.records.read().find(item => item.id === "shape");
+  assert.equal(shape.evaluation.shape.version, "shape-v1");
+  assert.equal(shape.evaluation.shape.score, 67);
+  assert.equal(shape.evaluation.score, 80);
+  assert.equal(restored.records.read().find(item => item.id === "old").evaluation.shape, undefined);
+  assert.equal(restored.previewImport(exported).records.duplicates, 2);
+});
+
+test("不正な形状点があれば記録もお手本も一括読込しない", () => {
+  const storage = memory(), service = backup.create(() => storage);
+  service.records.save(record("existing"));
+  const bad = record("bad"); bad.evaluation.shape = { version: "shape-v1", score: 999 };
+  assert.throws(() => service.importBackup(json([bad], [template("原")])));
+  assert.equal(service.records.read()[0].id, "existing");
+  assert.equal(service.templates.read().length, 0);
+});

@@ -341,3 +341,25 @@ test("以前保存したスタンプのパスをimgへ読み替え、元の保�
   assert.equal(storage.getItem(records.KEY), raw);
   assert.ok(JSON.parse(store.exportBackup()).records.every(item => item.evaluation.stamp.image.startsWith("img/")));
 });
+
+test("形状点を保存・再読込でき、旧記録は未採点のまま保つ", () => {
+  const storage = mockStorage(), store = records.createStore(() => storage);
+  const saved = record("shape");
+  saved.evaluation.shape = { version: "shape-v1", score: 73 };
+  store.save(saved); store.save(record("old"));
+  const reopened = records.createStore(() => storage);
+  assert.equal(reopened.read().find(item => item.id === "shape").evaluation.shape.score, 73);
+  assert.equal(reopened.read().find(item => item.id === "shape").evaluation.score, 80);
+  assert.equal(reopened.read().find(item => item.id === "old").evaluation.shape, undefined);
+});
+
+test("不正な形状点は保存せず、既存の記録も変更しない", () => {
+  const storage = mockStorage(), store = records.createStore(() => storage);
+  store.save(record("existing"));
+  for (const invalid of [null, {}, { version: "", score: 50 }, { version: "shape-v1", score: -1 },
+    { version: "shape-v1", score: 101 }, { version: "shape-v1", score: 4.5 }, { version: "shape-v1", score: "80" }]) {
+    const saved = record("invalid"); saved.evaluation.shape = invalid;
+    assert.throws(() => store.save(saved), /形式/);
+    assert.equal(store.read().length, 1);
+  }
+});

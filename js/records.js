@@ -32,6 +32,8 @@ const PracticeRecords = (() => {
         && Number.isFinite(point.x) && point.x >= 0 && point.x <= 1
         && Number.isFinite(point.y) && point.y >= 0 && point.y <= 1))
       && record.evaluation && textValid(record.evaluation.version) && scoreValid(record.evaluation.score)
+      && (record.evaluation.shape === undefined || (record.evaluation.shape
+        && textValid(record.evaluation.shape.version) && scoreValid(record.evaluation.shape.score)))
       && record.evaluation.scores && ["position", "size", "balance"].every(key => scoreValid(record.evaluation.scores[key]))
       && textValid(record.evaluation.focus) && textValid(record.evaluation.comment)
       && record.evaluation.stamp && stamps.has(record.evaluation.stamp.image) && textValid(record.evaluation.stamp.label)

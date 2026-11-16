@@ -6,15 +6,16 @@
   <meta name="theme-color" content="#30322f">
   <meta name="description" content="スキマ時間に一文字。お手本を見ながらスマホで練習する美文字ログ。">
   <title>美文字ログ</title>
-  <link rel="stylesheet" href="css/style.css?v=20261116-klee-one">
+  <link rel="stylesheet" href="css/style.css?v=20261116-shape">
   <script src="js/characters.js" defer></script>
   <script src="js/evaluation.js" defer></script>
-  <script src="js/records.js?v=20261116-growth-best" defer></script>
+  <script src="js/shape-evaluation.js?v=20261116-shape-2" defer></script>
+  <script src="js/records.js?v=20261116-shape" defer></script>
   <script src="js/templates.js" defer></script>
   <script src="js/backup.js?v=20261116-data-management" defer></script>
   <script src="js/canvas-drawing.js?v=20261116-refactor" defer></script>
   <script src="js/record-views.js?v=20261116-refactor" defer></script>
-  <script src="js/app.js?v=20261116-klee-one" defer></script>
+  <script src="js/app.js?v=20261116-shape" defer></script>
 </head>
 <body>
   <div class="app">
@@ -58,6 +59,7 @@
             </dl>
             <p class="total-score"><strong id="total-score"></strong><span> / 100点</span></p>
           </div>
+          <div class="shape-score-row"><p>形状 <strong id="shape-score"></strong></p><span>位置と大きさをそろえて比較</span></div>
           <div class="feedback"><h3 id="feedback-focus"></h3><p id="feedback-comment"></p></div>
           <button id="save-record" class="save-button">この練習を保存する</button>
           <div id="saved-actions" class="saved-actions" role="group" aria-label="保存した練習の操作" hidden>
@@ -124,6 +126,7 @@
     <div class="practice-paper record-paper"><canvas id="record-overlay" width="1000" height="1000" aria-hidden="true"></canvas><canvas id="record-writing" width="1000" height="1000" role="img" aria-label="保存した筆跡"></canvas><img id="record-stamp" class="result-stamp" alt=""></div>
     <p id="record-image-status" class="save-status" role="status"></p>
     <dl class="score-details" aria-label="保存した項目別の点数"><div><dt>位置</dt><dd id="record-position"></dd></div><div><dt>大きさ</dt><dd id="record-size"></dd></div><div><dt>縦横比</dt><dd id="record-balance"></dd></div></dl>
+    <div class="shape-score-row"><p>形状 <strong id="record-shape"></strong></p><span>総合点とは別の評価</span></div>
     <div class="feedback"><h3 id="record-focus"></h3><p id="record-comment"></p></div>
     <button id="delete-record" class="delete-button">この記録を削除する</button>
     <div id="delete-confirmation" class="delete-confirmation" role="group" aria-label="記録の削除確認" hidden>

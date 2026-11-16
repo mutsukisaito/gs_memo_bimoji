@@ -209,6 +209,7 @@
         HandwritingEvaluation.inspectInk(referencePixels),
         HandwritingEvaluation.inspectInk(writingPixels),
       );
+      evaluation.shape = ShapeEvaluation.evaluate(referencePixels, strokes);
       const now = new Date();
       currentDraft = {
         id: window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -224,6 +225,7 @@
       overlayCanvas.hidden = !overlayToggle.checked;
       currentEvaluation = evaluation;
       document.querySelector("#total-score").textContent = evaluation.score;
+      document.querySelector("#shape-score").textContent = `${evaluation.shape.score}点`;
       document.querySelector("#feedback-focus").textContent = evaluation.focus;
       document.querySelector("#feedback-comment").textContent = evaluation.comment;
       for (const [key, score] of Object.entries(evaluation.scores)) {
@@ -416,6 +418,8 @@
       document.querySelector("#record-title").textContent = `${record.character}の記録`;
       document.querySelector("#record-date").textContent = RecordViews.formatDate(record.createdAt);
       document.querySelector("#record-score").textContent = record.evaluation.score;
+      document.querySelector("#record-shape").textContent = record.evaluation.shape
+        ? `${record.evaluation.shape.score}点` : "未採点";
       document.querySelector("#record-focus").textContent = record.evaluation.focus;
       document.querySelector("#record-comment").textContent = record.evaluation.comment;
       document.querySelector("#delete-status").textContent = "";
