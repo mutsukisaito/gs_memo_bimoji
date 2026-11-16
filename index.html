@@ -32,10 +32,10 @@
         </div>
       </section>
       <section aria-labelledby="practice-heading">
-        <div class="section-heading practice-heading"><h2 id="practice-heading">書いてみましょう</h2><span>指・ペンで入力</span></div>
+        <div class="section-heading practice-heading"><h2 id="practice-heading">書いてみましょう</h2><button id="drawing-toggle" class="drawing-toggle" type="button" aria-pressed="false" aria-controls="writing-canvas">文字を書く</button></div>
         <div class="practice-paper">
           <canvas id="overlay-canvas" width="1000" height="1000" aria-hidden="true" hidden></canvas>
-          <canvas id="writing-canvas" width="1000" height="1000" role="img" aria-label="手書き練習欄。指、ペン、マウスで書けます。"></canvas>
+          <canvas id="writing-canvas" width="1000" height="1000" role="img" aria-label="手書き練習欄。現在はスクロールできます。文字を書くボタンで描画を開始します。"></canvas>
           <img id="result-stamp" class="result-stamp" alt="" hidden>
         </div>
         <div class="actions">
@@ -58,6 +58,10 @@
           </div>
           <div class="feedback"><h3 id="feedback-focus"></h3><p id="feedback-comment"></p></div>
           <button id="save-record" class="save-button">この練習を保存する</button>
+          <div id="saved-actions" class="saved-actions" role="group" aria-label="保存した練習の操作" hidden>
+            <button id="view-saved-record" class="saved-record-button" type="button">記録を見る</button>
+            <button id="practice-again" class="save-button" type="button">練習する</button>
+          </div>
           <p id="save-status" class="save-status" role="status" aria-live="polite"></p>
         </section>
       </section>

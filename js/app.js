@@ -2,6 +2,7 @@
 
 const writingCanvas = document.querySelector("#writing-canvas");
 const writingContext = writingCanvas.getContext("2d");
+const drawingToggle = document.querySelector("#drawing-toggle");
 const referenceCanvas = document.querySelector("#reference-canvas");
 const referenceContext = referenceCanvas.getContext("2d");
 const dialog = document.querySelector("#character-dialog");
@@ -19,6 +20,7 @@ const recordStore = backupService.records;
 const templateStore = backupService.templates;
 const saveButton = document.querySelector("#save-record");
 const saveStatus = document.querySelector("#save-status");
+const savedActions = document.querySelector("#saved-actions");
 const recordsList = document.querySelector("#records-list");
 const recordsStatus = document.querySelector("#records-status");
 const recordFilter = document.querySelector("#record-filter");
@@ -38,6 +40,23 @@ let activeStroke = null;
 let referenceVersion = 0;
 let referenceReady = false;
 let currentEvaluation = null;
+let drawingEnabled = false;
+
+function setDrawingEnabled(enabled) {
+  if (!enabled && activePointer !== null) finishStroke({ pointerId: activePointer });
+  drawingEnabled = Boolean(enabled) && !currentEvaluation;
+  writingCanvas.classList.toggle("is-drawing", drawingEnabled);
+  drawingToggle.setAttribute("aria-pressed", String(drawingEnabled));
+  drawingToggle.textContent = drawingEnabled ? "スクロールに戻る" : "文字を書く";
+  drawingToggle.disabled = Boolean(currentEvaluation);
+  drawingToggle.title = currentEvaluation ? "書き直すと、もう一度練習できます" : "";
+  writingCanvas.setAttribute("aria-label", currentEvaluation
+    ? `${selected.character}の採点済みの筆跡。スクロールできます。書き直すボタンで再び練習できます。`
+    : drawingEnabled ? "手書き練習欄。指、ペン、マウスで書けます。"
+      : "手書き練習欄。現在はスクロールできます。文字を書くボタンで描画を開始します。");
+}
+
+drawingToggle.addEventListener("click", () => setDrawingEnabled(!drawingEnabled));
 
 function updateEvaluateButton() {
   evaluateButton.disabled = !referenceReady || !strokes.length || activePointer !== null || currentEvaluation !== null;
@@ -47,14 +66,13 @@ function resetEvaluation() {
   currentEvaluation = null;
   currentDraft = null;
   saveStatus.textContent = "";
-  saveButton.disabled = false;
-  saveButton.textContent = "この練習を保存する";
+  setSavedState(false);
   resultPanel.hidden = true;
   overlayCanvas.hidden = true;
   stampImage.hidden = true;
   overlayToggle.checked = true;
   writingCanvas.classList.remove("evaluated");
-  writingCanvas.setAttribute("aria-label", "手書き練習欄。指、ペン、マウスで書けます。");
+  setDrawingEnabled(false);
   evaluateButton.textContent = "採点する";
   updateEvaluateButton();
 }
@@ -145,7 +163,8 @@ function finishStroke(event) {
 }
 
 writingCanvas.addEventListener("pointerdown", event => {
-  if (currentEvaluation || activePointer !== null || (event.pointerType === "mouse" && event.button !== 0)) return;
+  // スクロール中のタッチは捕捉せず、ブラウザの標準動作に任せる。
+  if (!drawingEnabled || currentEvaluation || activePointer !== null || (event.pointerType === "mouse" && event.button !== 0)) return;
   event.preventDefault();
   writingCanvas.setPointerCapture(event.pointerId);
   activePointer = event.pointerId;
@@ -158,7 +177,7 @@ writingCanvas.addEventListener("pointerdown", event => {
 });
 
 writingCanvas.addEventListener("pointermove", event => {
-  if (event.pointerId !== activePointer || !activeStroke) return;
+  if (!drawingEnabled || event.pointerId !== activePointer || !activeStroke) return;
   event.preventDefault();
   const events = event.getCoalescedEvents ? event.getCoalescedEvents() : [event];
   for (const sample of events.length ? events : [event]) {
@@ -232,12 +251,13 @@ evaluateButton.addEventListener("click", () => {
     stampImage.hidden = false;
     resultPanel.hidden = false;
     writingCanvas.classList.add("evaluated");
-    writingCanvas.setAttribute("aria-label", `${selected.character}の採点済みの筆跡。書き直すボタンで再び入力できます。`);
     evaluateButton.textContent = "採点済み";
     updateEvaluateButton();
     status.textContent = "";
   } catch (error) {
     status.textContent = error.message;
+  } finally {
+    setDrawingEnabled(false);
   }
 });
 
@@ -324,8 +344,14 @@ const formatDate = iso => new Intl.DateTimeFormat("ja-JP", {
 function syncSaveButton(records) {
   if (!currentDraft) return;
   const saved = records.some(record => record.id === currentDraft.id);
+  setSavedState(saved);
+}
+
+function setSavedState(saved) {
+  saveButton.hidden = saved;
   saveButton.disabled = saved;
-  saveButton.textContent = saved ? "保存済み" : "この練習を保存する";
+  savedActions.hidden = !saved;
+  if (saved) saveStatus.textContent = "";
 }
 
 function renderRecords(message = "") {
@@ -377,18 +403,30 @@ saveButton.addEventListener("click", () => {
   if (!currentDraft) return;
   try {
     recordStore.save(currentDraft);
-    saveButton.disabled = true;
-    saveButton.textContent = "保存済み";
-    saveStatus.textContent = "保存しました。「記録」タブから見返せます。";
+    setSavedState(true);
     renderGrowth();
   } catch (error) {
     saveStatus.textContent = error.message;
   }
 });
 
+document.querySelector("#view-saved-record").addEventListener("click", () => {
+  if (!currentDraft) return;
+  const id = currentDraft.id;
+  document.querySelector('[data-view="records"]').click();
+  openRecord(id);
+});
+
+document.querySelector("#practice-again").addEventListener("click", () => {
+  clearWriting();
+  setDrawingEnabled(true);
+  document.querySelector("#writing-view").scrollIntoView({ block: "start" });
+  drawingToggle.focus({ preventScroll: true });
+});
+
 for (const button of document.querySelectorAll("[data-view]")) {
   button.addEventListener("click", () => {
-    if (activePointer !== null) finishStroke({ pointerId: activePointer });
+    setDrawingEnabled(false);
     for (const tabButton of document.querySelectorAll("[data-view]")) {
       const active = tabButton === button;
       tabButton.classList.toggle("active", active);
