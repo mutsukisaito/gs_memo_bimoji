@@ -154,6 +154,8 @@ const PracticeRecords = (() => {
       practiceDays: new Set(records.map(record => record.localDate)).size,
       characters: [...groups].map(([character, history]) => ({
         character, count: history.length, first: history[history.length - 1], latest: history[0],
+        // 同点なら日時が新しい記録を選び、同一日時では保存順を保つ。
+        best: history.reduce((best, record) => record.evaluation.score > best.evaluation.score ? record : best),
       })),
     };
   }

@@ -6,13 +6,13 @@
   <meta name="theme-color" content="#30322f">
   <meta name="description" content="スキマ時間に一文字。お手本を見ながらスマホで練習する美文字ログ。">
   <title>美文字ログ</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=20261116-toast-tabs">
   <script src="js/characters.js" defer></script>
   <script src="js/evaluation.js" defer></script>
-  <script src="js/records.js" defer></script>
+  <script src="js/records.js?v=20261116-growth-best" defer></script>
   <script src="js/templates.js" defer></script>
   <script src="js/backup.js" defer></script>
-  <script src="js/app.js" defer></script>
+  <script src="js/app.js?v=20261116-toast-tabs" defer></script>
 </head>
 <body>
   <div class="app">
@@ -77,9 +77,9 @@
       </section>
       <section id="growth-view" aria-labelledby="growth-heading" hidden>
         <div class="section-heading records-heading"><h2 id="growth-heading">成長の証</h2></div>
-        <dl class="practice-stats"><div><dt>保存した練習数</dt><dd><strong id="practice-count">0</strong><span>字</span></dd></div><div><dt>練習日数</dt><dd><strong id="practice-days">0</strong><span>日</span></dd></div></dl>
-        <p class="growth-intro">同じ文字の、最初と最新の自分を見比べましょう。</p>
+        <dl class="practice-stats"><div><dt>練習数</dt><dd><strong id="practice-count">0</strong><span>字</span></dd></div><div><dt>練習日数</dt><dd><strong id="practice-days">0</strong><span>日</span></dd></div></dl>
         <p id="growth-status" class="records-status" role="status" aria-live="polite"></p>
+        <div id="growth-comparison-labels" class="comparison-pair comparison-headings" hidden><p class="comparison-label">最初の自分</p><p class="comparison-label">最高点の自分</p></div>
         <div id="growth-list" class="growth-list"></div>
         <p class="development-note">練習数は保存した記録の件数、練習日数は練習時の日付の重複を除いた数です。記録を削除すると集計も変わります。</p>
       </section>
@@ -133,5 +133,6 @@
     <div class="import-actions"><button id="cancel-import">キャンセル</button><button id="confirm-import">追加する</button></div>
     <p id="import-status" class="save-status" role="status" aria-live="polite"></p>
   </dialog>
+  <div id="toast" class="toast" popover="manual" role="status" aria-live="polite" aria-atomic="true"></div>
 </body>
 </html>

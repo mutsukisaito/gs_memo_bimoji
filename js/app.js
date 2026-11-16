@@ -399,12 +399,23 @@ function renderRecords(message = "") {
   }
 }
 
+let toastTimer;
+function showToast(message) {
+  const toast = document.querySelector("#toast");
+  // 連続操作では通知とタイマーを更新し、最後の結果を4秒間表示する。
+  window.clearTimeout(toastTimer);
+  toast.textContent = message;
+  toast.showPopover();
+  toastTimer = window.setTimeout(() => toast.hidePopover(), 4000);
+}
+
 saveButton.addEventListener("click", () => {
   if (!currentDraft) return;
   try {
     recordStore.save(currentDraft);
     setSavedState(true);
     renderGrowth();
+    showToast("練習を保存しました。");
   } catch (error) {
     saveStatus.textContent = error.message;
   }
@@ -520,6 +531,7 @@ document.querySelector("#confirm-delete").addEventListener("click", () => {
     recordDialog.close();
     renderRecords();
     renderGrowth();
+    showToast("記録を削除しました。");
   } catch (error) {
     document.querySelector("#delete-status").textContent = error.message;
   }
@@ -538,9 +550,6 @@ window.addEventListener("storage", event => {
 function comparisonSide(record, label) {
   const side = document.createElement("div");
   side.className = "comparison-side";
-  const heading = document.createElement("p");
-  heading.className = "comparison-label";
-  heading.textContent = label;
   const canvas = document.createElement("canvas");
   canvas.width = canvas.height = 400;
   canvas.setAttribute("role", "img");
@@ -552,41 +561,36 @@ function comparisonSide(record, label) {
   const score = document.createElement("p");
   score.className = "comparison-score";
   score.textContent = `${record.evaluation.score}点`;
-  side.append(heading, canvas, date, score);
+  const meta = document.createElement("div");
+  meta.className = "comparison-meta";
+  meta.append(score, date);
+  side.append(canvas, meta);
   return side;
 }
 
 function renderGrowth() {
   const list = document.querySelector("#growth-list");
   const growthStatus = document.querySelector("#growth-status");
+  const comparisonLabels = document.querySelector("#growth-comparison-labels");
+  comparisonLabels.hidden = true;
   list.replaceChildren();
   try {
     const summary = PracticeRecords.summarize(recordStore.read());
+    comparisonLabels.hidden = summary.practiceCount === 0;
     document.querySelector("#practice-count").textContent = summary.practiceCount;
     document.querySelector("#practice-days").textContent = summary.practiceDays;
     growthStatus.textContent = summary.practiceCount ? "" : "まだ記録がありません。練習を保存すると、ここで振り返れます。";
     for (const group of summary.characters) {
       const card = document.createElement("section");
       card.className = "comparison-card";
-      const title = document.createElement("h3");
-      title.textContent = `${group.character}の歩み`;
-      const count = document.createElement("p");
-      count.className = "comparison-count";
-      count.textContent = `${group.count}回の練習`;
+      card.setAttribute("aria-label", `${group.character}の成長比較`);
       const pair = document.createElement("div");
       pair.className = "comparison-pair";
       pair.append(comparisonSide(group.first, "最初の自分"));
-      if (group.count > 1) {
-        pair.append(comparisonSide(group.latest, "最新の自分"));
-      } else {
-        const placeholder = document.createElement("p");
-        placeholder.className = "comparison-placeholder";
-        placeholder.textContent = "もう一度この文字を保存すると、ここに最新の記録が並びます。";
-        pair.append(placeholder);
-      }
-      card.append(title, count, pair);
-      if (group.count > 1 && (group.first.reference.image !== group.latest.reference.image
-        || group.first.evaluation.version !== group.latest.evaluation.version)) {
+      pair.append(comparisonSide(group.best, "最高点の自分"));
+      card.append(pair);
+      if (group.first.reference.image !== group.best.reference.image
+        || group.first.evaluation.version !== group.best.evaluation.version) {
         const note = document.createElement("p");
         note.className = "comparison-note";
         note.textContent = "お手本または採点方法が異なる記録です。点数は参考に、字の変化を見比べてください。";
@@ -770,7 +774,7 @@ document.querySelector("#template-form").addEventListener("submit", event => {
     clearWriting();
     drawReference();
     templateDialog.close();
-    status.textContent = `「${character}」のお手本を登録しました。画像を見ながら練習してみましょう。`;
+    showToast(`「${character}」のお手本を登録しました。`);
   } catch (error) {
     templateStatus.textContent = error.message;
   }
@@ -790,7 +794,7 @@ document.querySelector("#confirm-remove-template").addEventListener("click", () 
     clearWriting();
     drawReference();
     renderCharacters();
-    document.querySelector("#template-list-status").textContent = "お手本を削除しました。保存済みの練習記録は残っています。";
+    showToast("お手本を削除しました。保存済みの練習記録は残っています。");
   } catch (error) {
     document.querySelector("#template-list-status").textContent = error.message;
   }

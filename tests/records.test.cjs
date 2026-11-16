@@ -154,6 +154,25 @@ test("順不同の記録から文字ごとの最初と最新を選び、元配�
   assert.equal(input.map(item => item.id).join(), originalOrder);
 });
 
+test("最高点は文字ごとに選び、同点では新しい日時・保存順を優先する", () => {
+  const first = record("first", "2026-11-13T12:00:00Z");
+  const best = record("best", "2026-11-14T12:00:00Z"); best.evaluation.score = 95;
+  const latest = record("latest", "2026-11-16T12:00:00Z");
+  const other = record("other"); other.character = "夢"; other.evaluation.score = 100;
+  const input = [latest, other, best, first];
+  const group = records.summarize(input).characters.find(item => item.character === "原");
+  assert.equal(group.first.id, "first");
+  assert.equal(group.best.id, "best");
+  assert.equal(group.latest.id, "latest");
+  assert.equal(input.map(item => item.id).join(), "latest,other,best,first");
+  latest.evaluation.score = 95;
+  assert.equal(records.summarize(input).characters.find(item => item.character === "原").best.id, "latest");
+  assert.equal(records.summarize([record("new"), record("old")]).characters[0].best.id, "new");
+  assert.equal(records.summarize([best]).characters[0].best.id, "best");
+  first.evaluation.score = 100;
+  assert.equal(records.summarize(input).characters.find(item => item.character === "原").best.id, "first");
+});
+
 test("削除すると日数・件数・最初と最新・前回コメントの対象を再集計する", () => {
   const first = record("first", "2026-11-13T12:00:00Z");
   first.localDate = "2026-11-13";
@@ -168,6 +187,7 @@ test("削除すると日数・件数・最初と最新・前回コメントの�
   assert.equal(summary.practiceDays, 1);
   assert.equal(summary.characters[0].first.id, "first");
   assert.equal(summary.characters[0].latest.id, "first");
+  assert.equal(summary.characters[0].best.id, "first");
   assert.equal(records.latestFor(store.read(), "原").id, "first");
   store.remove("first");
   assert.equal(records.latestFor(store.read(), "原"), null);
