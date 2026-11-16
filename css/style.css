@@ -55,9 +55,10 @@
 .records-heading { margin: 8px 0 22px; }
 .records-heading h2 { font-family: "Hiragino Mincho ProN", "Yu Mincho", serif; font-size: 22px; }
 .records-heading>span { color: var(--muted); font-size: 12px; }
-.records-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.records-toolbar label { font-size: 12px; }
-.records-toolbar select { min-height: 44px; max-width: 60%; padding: 8px 14px; border: 1px solid #cccbbf; border-radius: 6px; font: inherit; font-size: 13px; background: var(--paper); color: var(--ink); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.records-toolbar { display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 10px; }
+.records-toolbar>span { font-size: 12px; }
+.records-toolbar select { min-width: 0; width: 100%; min-height: 44px; padding: 8px; border: 1px solid #cccbbf; border-radius: 6px; font: inherit; font-size: 12px; background: var(--paper); color: var(--ink); }
 .records-status { font-size: 12px; line-height: 1.9; color: var(--muted); margin: 18px 0; }
 .records-status:empty { margin: 0; }
 .records-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 20px; }
@@ -67,8 +68,19 @@
 .record-card-info strong { display: block; font-size: 12px; font-weight: 500; }
 .record-card-info time { display: block; font-size: 9px; line-height: 1.7; margin-top: 4px; color: #686e61; overflow-wrap: anywhere; }
 .record-total { color: #b5232d; margin: 18px 0; }
+.record-summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0; }
+.record-summary .overlay-control { margin: 0; }
+.record-summary .record-total { margin: 0 0 0 auto; text-align: right; white-space: nowrap; }
+#record-dialog .score-details { border-top: 0; padding-top: 0; }
+#record-dialog .feedback { border-left: 0; }
 .record-total strong { font-size: 34px; }
 .record-total span { font-size: 12px; }
+@media(max-width:400px) {
+  .record-summary { gap: 8px; }
+  .record-summary label { font-size: 11px; }
+  .record-total strong { font-size: 28px; }
+  .record-total span { font-size: 9px; }
+}
 .record-paper { border: 1px solid #d5d7cc; }
 #record-overlay { position: absolute; inset: 0; pointer-events: none; }
 .delete-button { display: block; min-height: 44px; width: 100%; margin-top: 22px; border: 1px solid #b5232d; color: #a71f28; background: transparent; border-radius: 6px; font-size: 13px; }
@@ -101,11 +113,8 @@
 .comparison-note { font-size: 11px; line-height: 1.9; color: var(--accent); margin-bottom: 0; }
 
 /* 記録のバックアップ */
-.backup-panel { padding: 16px; margin-bottom: 22px; border: 1px solid #62685b; border-radius: 7px; }
-.backup-panel h3 { margin: 0; font-size: 13px; font-weight: 500; }
-.backup-panel>p { font-size: 11px; line-height: 1.8; color: var(--muted); }
-.backup-actions { display: flex; gap: 10px; margin-top: 14px; }
-.backup-actions>button, .import-label { flex: 1; min-width: 0; min-height: 44px; display: flex; align-items: center; justify-content: center; font: inherit; font-size: 12px; color: var(--paper); background: transparent; border: 1px solid #999e90; border-radius: 5px; padding: 10px 6px; }
+.backup-actions { display: flex; gap: 8px; margin-left: auto; }
+.backup-actions>button, .import-label { min-height: 44px; display: flex; align-items: center; justify-content: center; font: inherit; font-size: 12px; color: var(--paper); background: transparent; border: 1px solid #999e90; border-radius: 5px; padding: 8px; white-space: nowrap; }
 .import-label { position: relative; overflow: hidden; }
 .file-input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 .import-label:focus-within { outline: 3px solid var(--accent); outline-offset: 4px; }
@@ -127,7 +136,13 @@
 .template-replace input { flex-shrink: 0; width: 18px; height: 18px; accent-color: var(--ink); }
 
 #import-summary { white-space: pre-line; }
-.records-sort { margin-top: 12px; }
+@media (max-width: 360px) {
+  #records-heading { font-size: 19px; }
+  .backup-actions { gap: 6px; }
+  .backup-actions>button, .import-label { font-size: 11px; padding: 6px; }
+  .records-toolbar { gap: 6px; }
+  .records-toolbar select { padding: 8px 2px; font-size: 11px; }
+}
 
 /* お手本と手書き欄を近づける */
 .reference-row h2 { margin: 0; font-size: clamp(10px, 2.65vw, 13px); line-height: 1.6; font-weight: 400; }

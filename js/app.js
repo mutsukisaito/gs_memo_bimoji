@@ -47,7 +47,7 @@ function setDrawingEnabled(enabled) {
   drawingEnabled = Boolean(enabled) && !currentEvaluation;
   writingCanvas.classList.toggle("is-drawing", drawingEnabled);
   drawingToggle.setAttribute("aria-pressed", String(drawingEnabled));
-  drawingToggle.textContent = drawingEnabled ? "スクロールに戻る" : "文字を書く";
+  drawingToggle.textContent = drawingEnabled ? "一時停止" : "文字を書く";
   drawingToggle.disabled = Boolean(currentEvaluation);
   drawingToggle.title = currentEvaluation ? "書き直すと、もう一度練習できます" : "";
   writingCanvas.setAttribute("aria-label", currentEvaluation
@@ -518,7 +518,7 @@ document.querySelector("#confirm-delete").addEventListener("click", () => {
   try {
     recordStore.remove(openRecordId);
     recordDialog.close();
-    renderRecords("記録を削除しました。");
+    renderRecords();
     renderGrowth();
   } catch (error) {
     document.querySelector("#delete-status").textContent = error.message;

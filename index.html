@@ -60,7 +60,7 @@
           <button id="save-record" class="save-button">この練習を保存する</button>
           <div id="saved-actions" class="saved-actions" role="group" aria-label="保存した練習の操作" hidden>
             <button id="view-saved-record" class="saved-record-button" type="button">記録を見る</button>
-            <button id="practice-again" class="save-button" type="button">練習する</button>
+            <button id="practice-again" class="save-button" type="button">練習再開</button>
           </div>
           <p id="save-status" class="save-status" role="status" aria-live="polite"></p>
         </section>
@@ -68,18 +68,12 @@
       <p class="development-note">採点後に「この練習を保存する」を押すと、このブラウザに記録が残ります。保存していない筆跡は再読み込みで消えます。</p>
       </div>
       <section id="records-view" aria-labelledby="records-heading" hidden>
-        <div class="section-heading records-heading"><h2 id="records-heading">練習の記録</h2><span id="records-count"></span></div>
-        <section class="backup-panel" aria-labelledby="backup-heading">
-          <h3 id="backup-heading">記録のバックアップ</h3>
-          <p>全記録と登録お手本の文字名・画像をJSONファイルに保存し、ほかの端末でも読み込めます。</p>
-          <div class="backup-actions"><button id="export-records">書き出す</button><label class="import-label" for="import-records">ファイルを読み込む<input id="import-records" type="file" accept=".json,application/json" class="file-input"></label></div>
-          <p id="backup-status" class="save-status" role="status" aria-live="polite"></p>
-        </section>
-        <div class="records-toolbar"><label for="record-filter">文字で絞り込む</label><select id="record-filter"><option value="">すべての文字</option></select></div>
-        <div class="records-toolbar records-sort"><label for="record-sort">並べ替え</label><select id="record-sort"><option value="date-desc">日付の新しい順</option><option value="date-asc">日付の古い順</option><option value="score-desc">点数の高い順</option><option value="score-asc">点数の低い順</option></select></div>
+        <div class="section-heading records-heading"><h2 id="records-heading">練習の記録</h2><div class="backup-actions"><button id="export-records" aria-label="全記録と登録お手本をバックアップ">バックアップ</button><label class="import-label" for="import-records">読込<input id="import-records" type="file" accept=".json,application/json" class="file-input" aria-label="バックアップファイルを読み込む"></label></div></div>
+        <span id="records-count" class="visually-hidden"></span>
+        <div class="records-toolbar"><span>表示</span><select id="record-filter" aria-label="文字で絞り込む"><option value="">すべての文字</option></select><select id="record-sort" aria-label="並べ替え"><option value="date-desc">日付の新しい順</option><option value="date-asc">日付の古い順</option><option value="score-desc">点数の高い順</option><option value="score-asc">点数の低い順</option></select></div>
+        <p id="backup-status" class="save-status" role="status" aria-live="polite"></p>
         <p id="records-status" class="records-status" role="status" aria-live="polite"></p>
         <div id="records-list" class="records-list"></div>
-        <p class="development-note">点数が同じ場合は日付の新しい順に表示します。記録はこの端末・ブラウザに保存されます。ブラウザのデータ削除で記録も消えます。</p>
       </section>
       <section id="growth-view" aria-labelledby="growth-heading" hidden>
         <div class="section-heading records-heading"><h2 id="growth-heading">成長の証</h2></div>
@@ -116,13 +110,14 @@
   </dialog>
   <dialog id="record-dialog" aria-labelledby="record-title">
     <div class="dialog-header"><div><p id="record-date" class="eyebrow"></p><h2 id="record-title"></h2></div><button id="close-record" class="close-button" aria-label="記録の詳細を閉じる">×</button></div>
-    <p class="record-total"><strong id="record-score"></strong><span> / 100点</span></p>
+    <div class="record-summary">
+      <div class="overlay-control"><label><input id="record-show-overlay" type="checkbox" checked> お手本・スタンプを重ねる</label></div>
+      <p class="record-total"><strong id="record-score"></strong><span> / 100点</span></p>
+    </div>
     <div class="practice-paper record-paper"><canvas id="record-overlay" width="1000" height="1000" aria-hidden="true"></canvas><canvas id="record-writing" width="1000" height="1000" role="img" aria-label="保存した筆跡"></canvas><img id="record-stamp" class="result-stamp" alt=""></div>
-    <div class="overlay-control"><label><input id="record-show-overlay" type="checkbox" checked> お手本・スタンプを重ねる</label><span>採点時のお手本を表示しています</span></div>
     <p id="record-image-status" class="save-status" role="status"></p>
-    <div class="feedback"><h3 id="record-focus"></h3><p id="record-comment"></p></div>
     <dl class="score-details" aria-label="保存した項目別の点数"><div><dt>位置</dt><dd id="record-position"></dd></div><div><dt>大きさ</dt><dd id="record-size"></dd></div><div><dt>縦横比</dt><dd id="record-balance"></dd></div></dl>
-    <p class="evaluation-note">点数は配置の目安です。保存した評価を表示しており、再採点は行いません。</p>
+    <div class="feedback"><h3 id="record-focus"></h3><p id="record-comment"></p></div>
     <button id="delete-record" class="delete-button">この記録を削除する</button>
     <div id="delete-confirmation" class="delete-confirmation" role="group" aria-label="記録の削除確認" hidden>
       <p>この記録を削除しますか？<br>削除すると元に戻せません。</p>
