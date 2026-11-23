@@ -6,16 +6,17 @@
   <meta name="theme-color" content="#30322f">
   <meta name="description" content="スキマ時間に一文字。お手本を見ながらスマホで練習する美文字ログ。">
   <title>美文字ログ</title>
-  <link rel="stylesheet" href="css/style.css?v=20261116-result-four-scores">
+  <link rel="stylesheet" href="css/style.css?v=20261123-character-dialog">
   <script src="js/characters.js" defer></script>
   <script src="js/evaluation.js" defer></script>
   <script src="js/shape-evaluation.js?v=20261116-shape-2" defer></script>
   <script src="js/records.js?v=20261116-shape" defer></script>
-  <script src="js/templates.js" defer></script>
-  <script src="js/backup.js?v=20261116-data-management" defer></script>
+  <script src="js/font-characters.js" defer></script>
+  <script src="js/templates.js?v=20261123-font-characters" defer></script>
+  <script src="js/backup.js?v=20261123-font-characters" defer></script>
   <script src="js/canvas-drawing.js?v=20261116-refactor" defer></script>
   <script src="js/record-views.js?v=20261116-growth-notes" defer></script>
-  <script src="js/app.js?v=20261116-shape" defer></script>
+  <script src="js/app.js?v=20261123-font-characters" defer></script>
 </head>
 <body>
   <div class="app">
@@ -95,10 +96,12 @@
     <footer>美文字ログ <span>日々の小さな練習を、成長の記録に。</span></footer>
   </div>
   <dialog id="character-dialog" aria-labelledby="dialog-title">
-    <div class="dialog-header"><div><p class="eyebrow">一文字を選んで、はじめる</p><h2 id="dialog-title">練習する文字</h2></div><button id="close-dialog" class="close-button" aria-label="文字選択を閉じる">×</button></div>
-    <p class="dialog-note">文字を変えると、書きかけの内容は消えます。</p>
-    <button id="add-template" class="template-add">画像のお手本を登録</button>
-    <div class="category-buttons" role="group" aria-label="文字の種類"><button data-category="hiragana" aria-pressed="false">ひらがな <span>46</span></button><button data-category="kanji" aria-pressed="true">漢字 <span>39</span></button><button data-category="custom" aria-pressed="false">登録 <span id="template-count">0</span></button></div>
+    <div class="dialog-header"><h2 id="dialog-title">練習する文字</h2><button id="close-dialog" class="close-button" aria-label="文字選択を閉じる">×</button></div>
+    <div class="character-add-actions">
+      <button id="add-font-character" class="template-add">1文字追加</button>
+      <button id="add-template" class="template-add">画像のお手本を登録</button>
+    </div>
+    <div class="category-buttons" role="group" aria-label="文字の種類"><button data-category="hiragana" aria-pressed="false">ひらがな <span>0</span></button><button data-category="kanji" aria-pressed="true">漢字 <span>0</span></button><button data-category="custom" aria-pressed="false">登録 <span id="template-count">0</span></button></div>
     <p id="template-list-status" class="save-status" role="status"></p>
     <div id="character-grid" class="character-grid" role="group" aria-label="文字一覧"></div>
     <div id="remove-template-area" hidden><button id="remove-template" class="delete-button">選択中の登録お手本を削除</button><div id="remove-template-confirm" class="delete-confirmation" hidden><p>このお手本を削除しますか？書きかけの文字は消えます。保存済みの練習記録は残ります。</p><div><button id="cancel-remove-template" class="cancel-delete">キャンセル</button><button id="confirm-remove-template" class="confirm-delete">お手本を削除する</button></div></div></div>
@@ -107,10 +110,13 @@
     <div class="dialog-header"><h2 id="template-title">画像のお手本を登録</h2><button id="close-template" class="close-button" aria-label="お手本登録を閉じる">×</button></div>
     <form id="template-form" novalidate>
       <label class="template-field" for="template-character">文字名（1文字）<input id="template-character" type="text" autocomplete="off" placeholder="例：原" required></label>
+      <p id="font-template-help" class="evaluation-note" hidden>画像は不要です。Klee Oneのお手本で練習できます。追加した文字は「登録」一覧に保存します。</p>
+      <div id="image-template-fields">
       <label class="template-field" for="template-file">お手本画像（PNG・JPEG・WebP、10MBまで）<input id="template-file" type="file" accept="image/png,image/jpeg,image/webp" required></label>
       <p class="evaluation-note">白背景または透過背景に、黒い文字が1文字ある画像を選んでください。余白を含めて正方形の枠内に収め、600×600に縮小して保存します。</p>
       <div id="template-preview-area" hidden><p class="evaluation-note">保存するお手本のプレビュー</p><div class="template-preview"><canvas id="template-preview" width="600" height="600" role="img" aria-label="登録するお手本のプレビュー"></canvas></div></div>
       <label class="template-replace"><input id="replace-template" type="checkbox"> 同じ文字の登録お手本がある場合、画像を置き換える</label>
+      </div>
       <label class="template-replace"><input id="discard-template-writing" type="checkbox"> 書きかけの文字がある場合、消して登録したお手本で練習する</label>
       <button id="save-template" type="submit" class="save-button" disabled>登録して練習する</button>
       <p id="template-status" class="save-status" role="status" aria-live="polite"></p>

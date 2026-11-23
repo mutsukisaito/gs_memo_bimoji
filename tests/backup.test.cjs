@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const path = require("node:path");
 const vm = require("node:vm");
-const source = ["records", "templates", "backup"].map(name => fs.readFileSync(path.join(__dirname, `../js/${name}.js`), "utf8")).join("\n");
+const source = ["records", "font-characters", "templates", "backup"].map(name => fs.readFileSync(path.join(__dirname, `../js/${name}.js`), "utf8")).join("\n");
 const { AppBackup: backup, PracticeRecords: records, CustomTemplates: templates } = vm.runInNewContext(`${source}\n({ AppBackup, PracticeRecords, CustomTemplates });`);
 const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aQ1kAAAAASUVORK5CYII=";
 const template = character => ({ character, image: png, updatedAt: "2026-11-16T00:00:00Z" });
@@ -12,7 +12,7 @@ function memory() {
   const map = new Map();
   return { getItem: key => map.get(key) ?? null, setItem: (key, value) => map.set(key, value), removeItem: key => map.delete(key) };
 }
-const json = (savedRecords = [], savedTemplates = [], version = 2) => JSON.stringify({ format: "bimoji-log-backup", version, exportedAt: "2026-11-16T00:00:00Z", records: savedRecords, ...(version === 2 ? { templates: savedTemplates } : {}) });
+const json = (savedRecords = [], savedTemplates = [], version = 2) => JSON.stringify({ format: "bimoji-log-backup", version, exportedAt: "2026-11-16T00:00:00Z", records: savedRecords, ...(version >= 2 ? { templates: savedTemplates } : {}) });
 
 test("全削除は統合・旧キーの記録とお手本だけを削除し、再読込でも復活しない", () => {
   const storage = memory(); const service = backup.create(() => storage);
@@ -61,12 +61,12 @@ test("削除失敗を通知し、旧キー削除途中の失敗でも過去の�
   assert.equal(storage.getItem(records.KEY), null);
 });
 
-test("v2に文字名・画像と記録を含め、空の保存先に完全復元する", () => {
+test("v3に文字名・画像と記録を含め、空の保存先に完全復元する", () => {
   const a = memory(); const original = backup.create(() => a);
   original.records.save(record("a")); original.templates.save(template("原"));
   const exported = original.exportBackup();
   const data = JSON.parse(exported);
-  assert.equal(data.version, 2); assert.equal(data.templates[0].image, png);
+  assert.equal(data.version, 3); assert.equal(data.templates[0].image, png);
   const b = memory(); const restored = backup.create(() => b);
   const preview = restored.previewImport(exported);
   assert.equal(preview.records.additions.length, 1); assert.equal(preview.templates.additions.length, 1);
@@ -109,7 +109,7 @@ test("お手本が不正なら正常な記録も追加せず、記録が不正�
   const storage = memory(); const service = backup.create(() => storage);
   const bad = { ...template("原"), character: "原夢" };
   for (const text of [json([record("a")], [bad]), json([{ ...record("a"), strokes: [] }], [template("原")]),
-    json([], [template("原"), template("原")]), json([], [], 3), json([]).replace('"templates":[]', '"templates":null')]) {
+    json([], [template("原"), template("原")]), json([], [], 4), json([]).replace('"templates":[]', '"templates":null')]) {
     assert.throws(() => service.importBackup(text), /読み込めません/);
     assert.equal(storage.getItem(backup.KEY), null);
   }
@@ -190,4 +190,36 @@ test("不正な形状点があれば記録もお手本も一括読込しない",
   assert.throws(() => service.importBackup(json([bad], [template("原")])));
   assert.equal(service.records.read()[0].id, "existing");
   assert.equal(service.templates.read().length, 0);
+});
+
+test("追加したフォント文字・画像お手本・練習記録を一緒に完全復元する", () => {
+  const a = memory(), service = backup.create(() => a);
+  service.templates.save(templates.createFont("愛", [], []));
+  service.templates.save(template("夢"));
+  service.records.save({ ...record("font"), character: "愛", reference: { image: png, kind: "font", version: "reference-v1", fontFamily: '"Klee One"', source: null } });
+  const exported = service.exportBackup();
+  const b = memory(), restored = backup.create(() => b);
+  restored.importBackup(exported);
+  assert.equal(restored.records.read()[0].character, "愛");
+  assert.equal(restored.templates.read().find(item => item.character === "愛").kind, "font");
+  assert.equal(restored.templates.read().find(item => item.character === "夢").image, png);
+  assert.equal(restored.previewImport(exported).templates.duplicates, 2);
+  const changedTime = { ...templates.createFont("愛", [], []), updatedAt: "2026-11-17T00:00:00Z" };
+  assert.equal(restored.previewImport(json([], [changedTime], 3)).templates.duplicates, 1);
+  assert.equal(restored.previewImport(json([], [template("愛")], 3)).templates.conflicts, 1);
+  assert.throws(() => restored.importBackup(json([], [changedTime], 2)), /読み込めません/);
+});
+
+test("フォント文字が不正・容量不足なら新しい記録も追加しない", () => {
+  const storage = memory(), service = backup.create(() => storage);
+  service.templates.save(template("原"));
+  const before = storage.getItem(backup.KEY);
+  const font = templates.createFont("愛", [], []);
+  for (const bad of [{ ...font, character: "😀" }, { ...font, fontFamily: "other" }]) {
+    assert.throws(() => service.importBackup(json([record("new")], [bad], 3)));
+    assert.equal(storage.getItem(backup.KEY), before);
+  }
+  storage.setItem = () => { const error = new Error(); error.name = "QuotaExceededError"; throw error; };
+  assert.throws(() => service.importBackup(json([record("new")], [font], 3)), /追加していません/);
+  assert.equal(storage.getItem(backup.KEY), before);
 });

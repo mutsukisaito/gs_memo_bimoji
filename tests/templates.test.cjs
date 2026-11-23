@@ -3,7 +3,8 @@ const assert = require("node:assert/strict");
 const fs = require("node:fs");
 const vm = require("node:vm");
 const path = require("node:path");
-const templates = vm.runInNewContext(`${fs.readFileSync(path.join(__dirname, "../js/templates.js"), "utf8")}\nCustomTemplates;`);
+const source = ["font-characters", "templates"].map(name => fs.readFileSync(path.join(__dirname, `../js/${name}.js`), "utf8")).join("\n");
+const templates = vm.runInNewContext(`${source}\nCustomTemplates;`);
 const png = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aQ1kAAAAASUVORK5CYII=";
 const item = character => ({ character, image: png, updatedAt: "2026-11-16T00:00:00Z" });
 function memory() {
@@ -77,4 +78,35 @@ test("壊れたデータや重複のある保存先を上書きしない", () =>
 test("ストレージを使えない場合は利用設定を案内する", () => {
   const store = templates.createStore(() => { throw new Error("denied"); });
   assert.throws(() => store.read(), /利用設定/);
+});
+
+test("文字名だけの追加はKlee Oneを指定し、再読み込み後も画像なしで維持する", () => {
+  const storage = memory(), store = templates.createStore(() => storage);
+  const font = templates.createFont(" 愛 ", [{ character: "原" }], store.read());
+  assert.equal(font.character, "愛");
+  assert.equal(font.kind, "font");
+  assert.equal(font.fontFamily, "Klee One");
+  assert.equal(font.image, undefined);
+  store.save(font);
+  const restored = templates.createStore(() => storage).read()[0];
+  assert.equal(JSON.stringify(restored), JSON.stringify(font));
+  assert.throws(() => templates.createFont("愛", [], store.read()), /追加済み/);
+  assert.throws(() => templates.createFont("原", [{ character: "原" }], []), /追加済み/);
+  store.remove("愛");
+  assert.equal(store.read().length, 0);
+});
+
+test("非対応字形・不可視文字・不正な種類やフォントを保存しない", () => {
+  const storage = memory(), store = templates.createStore(() => storage);
+  for (const character of ["😀", "𰻞", "\u200b", "\u0301", "\u0000"]) {
+    assert.throws(() => templates.createFont(character, [], []), /Klee One/);
+    assert.equal(templates.validTemplates([{ character, kind: "font", fontFamily: "Klee One", updatedAt: item("原").updatedAt }]), false);
+  }
+  const font = templates.createFont("愛", [], []);
+  for (const bad of [{ ...font, fontFamily: "other" }, { ...font, image: png }, { ...font, kind: "unknown" }, { ...font, character: "原夢" }]) {
+    assert.throws(() => store.save(bad));
+  }
+  // 画像登録ならフォント未収録の文字も使える。
+  store.save(item("𰻞"));
+  assert.equal(store.read()[0].character, "𰻞");
 });

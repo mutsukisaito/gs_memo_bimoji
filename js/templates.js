@@ -10,10 +10,27 @@ const CustomTemplates = (() => {
     return character;
   }
   function valid(item) {
-    return item && typeof item.character === "string" && normalizeCharacter(item.character) === item.character
-      && typeof item.image === "string" && item.image.length <= MAX_IMAGE_LENGTH
-      && /^data:image\/png;base64,iVBORw0KGgo[A-Za-z0-9+/]+=*$/.test(item.image)
-      && typeof item.updatedAt === "string" && Number.isFinite(Date.parse(item.updatedAt));
+    try {
+      if (!item || normalizeCharacter(item.character) !== item.character
+        || typeof item.updatedAt !== "string" || !Number.isFinite(Date.parse(item.updatedAt))) return false;
+      if (item.kind === "font") return item.fontFamily === "Klee One" && item.image === undefined && FontCharacters.supports(item.character);
+      // 種類のない旧データは、これまでどおり画像のお手本として読む。
+      return (item.kind === undefined || item.kind === "image")
+        && typeof item.image === "string" && item.image.length <= MAX_IMAGE_LENGTH
+        && /^data:image\/png;base64,iVBORw0KGgo[A-Za-z0-9+/]+=*$/.test(item.image);
+    } catch { return false; }
+  }
+  function createFont(value, standardCharacters, registered) {
+    const character = normalizeCharacter(value);
+    if (standardCharacters.some(item => item.character === character) || registered.some(item => item.character === character)) {
+      throw new Error("この文字は追加済みです。文字一覧から選んで練習してください。");
+    }
+    if (!FontCharacters.supports(character)) throw new Error("Klee Oneにない文字です。画像のお手本を登録してください。");
+    return { character, kind: "font", fontFamily: "Klee One", updatedAt: new Date().toISOString() };
+  }
+  function sameReference(a, b) {
+    return a.kind === "font" || b.kind === "font"
+      ? a.kind === b.kind && a.fontFamily === b.fontFamily : a.image === b.image;
   }
   function createStore(getStorage) {
     function read() {
@@ -53,5 +70,5 @@ const CustomTemplates = (() => {
   function validTemplates(items) {
     return Array.isArray(items) && items.every(valid) && new Set(items.map(item => item.character)).size === items.length;
   }
-  return { KEY, MAX_FILE_BYTES, MAX_IMAGE_LENGTH, normalizeCharacter, createStore, validTemplates };
+  return { KEY, MAX_FILE_BYTES, MAX_IMAGE_LENGTH, normalizeCharacter, createFont, sameReference, createStore, validTemplates };
 })();

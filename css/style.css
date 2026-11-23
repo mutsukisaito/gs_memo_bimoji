@@ -1263,6 +1263,20 @@ html  {
 }
 
 /* ブラウザからのお手本登録 */
+.character-add-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.character-add-actions .template-add {
+  margin-bottom: 0;
+  padding: 8px 4px;
+  font-size: clamp(11px, 3.2vw, 13px);
+  white-space: nowrap;
+}
+
 .template-add  {
   width: 100%;
   min-height: 44px;

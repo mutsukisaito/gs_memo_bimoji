@@ -9,3 +9,5 @@
 - ライセンス：SIL Open Font License 1.1（[OFL.txt](OFL.txt)）
 
 現時点の標準文字85文字（ひらがな46・漢字39）の収録を確認しています。フォントを再配布する場合は、著作権表示とOFL.txtを一緒に保持してください。
+
+文字名だけの追加では、同梱ファイルのcmapから生成した `js/font-characters.js` で字形の有無を確認します。フォントを差し替えた場合は `node scripts/generate-font-coverage.cjs` で対応範囲を再生成してください。フォント本体は変更しません。

@@ -256,18 +256,19 @@
     const listStatus = document.querySelector("#template-list-status");
     listStatus.textContent = "";
     let custom = [];
+    let customAvailable = true;
     try {
       custom = templateStore.read().map(item => ({ ...item, category: "custom" }));
-      document.querySelector("#template-count").textContent = custom.length;
-      if (category === "custom" && !custom.length) listStatus.textContent = "登録したお手本はありません。画像のお手本を登録してみましょう。";
+      if (category === "custom" && !custom.length) listStatus.textContent = "登録したお手本はありません。文字名だけで追加するか、画像を登録してください。";
     } catch (error) {
-      document.querySelector("#template-count").textContent = "—";
+      customAvailable = false;
       listStatus.textContent = error.message;
     }
+    const characters = [...CHARACTERS, ...custom];
     document.querySelector("#remove-template-area").hidden = category !== "custom" || !custom.some(item => selected.category === "custom" && item.character === selected.character);
     document.querySelector("#remove-template-confirm").hidden = true;
     document.querySelector("#remove-template").hidden = false;
-    for (const item of [...CHARACTERS, ...custom].filter(item => item.category === category)) {
+    for (const item of characters.filter(item => item.category === category)) {
       const button = document.createElement("button");
       button.type = "button";
       button.textContent = item.character;
@@ -287,6 +288,8 @@
     }
     for (const button of document.querySelectorAll("[data-category]")) {
       button.setAttribute("aria-pressed", String(button.dataset.category === category));
+      button.querySelector("span").textContent = button.dataset.category === "custom" && !customAvailable
+        ? "—" : characters.filter(item => item.category === button.dataset.category).length;
     }
   }
 
@@ -629,17 +632,26 @@
   const templateSave = document.querySelector("#save-template");
   let pendingTemplateImage = null;
   let templateImageVersion = 0;
+  let templateMode = "image";
 
-  document.querySelector("#add-template").addEventListener("click", () => {
+  function openTemplateRegistration(mode) {
+    templateMode = mode;
     dialog.close();
     document.querySelector("#template-form").reset();
     pendingTemplateImage = null;
     templateImageVersion++;
-    templateSave.disabled = true;
+    templateSave.disabled = mode === "image";
     templateStatus.textContent = "";
     document.querySelector("#template-preview-area").hidden = true;
+    document.querySelector("#template-title").textContent = mode === "font" ? "文字名だけで追加" : "画像のお手本を登録";
+    document.querySelector("#font-template-help").hidden = mode !== "font";
+    document.querySelector("#image-template-fields").hidden = mode !== "image";
+    templateFile.required = mode === "image";
     templateDialog.showModal();
-  });
+    document.querySelector("#template-character").focus();
+  }
+  document.querySelector("#add-template").addEventListener("click", () => openTemplateRegistration("image"));
+  document.querySelector("#add-font-character").addEventListener("click", () => openTemplateRegistration("font"));
   document.querySelector("#close-template").addEventListener("click", () => templateDialog.close());
   templateDialog.addEventListener("close", () => {
     templateImageVersion++;
@@ -693,10 +705,12 @@
     event.preventDefault();
     try {
       const character = CustomTemplates.normalizeCharacter(document.querySelector("#template-character").value);
-      if (!pendingTemplateImage) throw new Error("お手本画像を選んでください。");
+      if (templateMode === "image" && !pendingTemplateImage) throw new Error("お手本画像を選んでください。");
       if (strokes.length && !document.querySelector("#discard-template-writing").checked) throw new Error("書きかけの文字があります。消して練習する場合は確認にチェックしてください。");
-      const item = { character, image: pendingTemplateImage, updatedAt: new Date().toISOString() };
-      templateStore.save(item, document.querySelector("#replace-template").checked);
+      const item = templateMode === "font"
+        ? CustomTemplates.createFont(character, CHARACTERS, templateStore.read())
+        : { character, image: pendingTemplateImage, updatedAt: new Date().toISOString() };
+      templateStore.save(item, templateMode === "image" && document.querySelector("#replace-template").checked);
       selected = { ...item, category: "custom" };
       category = "custom";
       clearWriting();

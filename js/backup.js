@@ -6,11 +6,12 @@ const AppBackup = (() => {
     if (typeof text !== "string" || text.length > PracticeRecords.MAX_BACKUP_BYTES) throw new Error("読み込めるファイルは10MBまでです。保存データは変更していません。");
     try {
       const backup = JSON.parse(text.replace(/^\uFEFF/, ""));
-      if (backup.format !== "bimoji-log-backup" || ![1, 2].includes(backup.version)
+      if (backup.format !== "bimoji-log-backup" || ![1, 2, 3].includes(backup.version)
         || typeof backup.exportedAt !== "string" || !Number.isFinite(Date.parse(backup.exportedAt))
         || !PracticeRecords.validRecords(backup.records)) throw new Error();
       const templates = backup.version === 1 ? [] : backup.templates;
       if (!CustomTemplates.validTemplates(templates)) throw new Error();
+      if (backup.version < 3 && templates.some(item => item.kind === "font")) throw new Error();
       return { records: backup.records.map(PracticeRecords.normalizeRecord), templates };
     } catch {
       throw new Error("美文字ログのバックアップとして読み込めません。形式・バージョン・記録・お手本を確認してください。保存データは変更していません。");
@@ -68,7 +69,7 @@ const AppBackup = (() => {
       const incoming = parse(text);
       return {
         records: planFor(records.read(), incoming.records, "id", (a, b) => PracticeRecords.canonical(a) === PracticeRecords.canonical(b)),
-        templates: planFor(templates.read(), incoming.templates, "character", (a, b) => a.image === b.image),
+        templates: planFor(templates.read(), incoming.templates, "character", CustomTemplates.sameReference),
       };
     }
     return {
@@ -86,7 +87,7 @@ const AppBackup = (() => {
         }
       },
       exportBackup() {
-        return JSON.stringify({ format: "bimoji-log-backup", version: 2, exportedAt: new Date().toISOString(), records: records.read(), templates: templates.read() }, null, 2);
+        return JSON.stringify({ format: "bimoji-log-backup", version: 3, exportedAt: new Date().toISOString(), records: records.read(), templates: templates.read() }, null, 2);
       },
       previewImport,
       importBackup(text) {
